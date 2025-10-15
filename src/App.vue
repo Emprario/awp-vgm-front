@@ -1,11 +1,16 @@
 <script setup></script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="bg-pureblack fixed top-0 left-0 -z-10 h-screen w-full"></div>
+  <div>
+    <h1 class="text-5xl text-white">The VideoGameForum</h1>
+  </div>
 </template>
 
-<style scoped></style>
+<style>
+@import 'tailwindcss';
+
+@theme {
+  --color-pureblack: #0e1428;
+}
+</style>
