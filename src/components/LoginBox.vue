@@ -2,9 +2,11 @@
   <div>
     <fieldset class="pr-15 pf-15">
       <legend class="text-2xl">Login</legend>
-      <input class="flex p-2 w-full row" name="username" type="email"/>
+      <label for="username">Username</label>
+      <input class="flex p-2 w-full row" name="username" type="text" placeholder=""/>
       <span>Username</span>
-      <input class="flex p-2 w-full row" name="password" type="email"/>
+      <label for="password">Password</label>
+      <input class="flex p-2 w-full row" name="password" type="password" placeholder=""/>
       <span>Password</span>
     </fieldset> 
   </div>
@@ -22,23 +24,34 @@ input {
   border-radius: 1em;
   border: none;
   padding-top: .8em;
+  z-index: 2;
+  padding-left: 1em
 }
 
-input:valid:not(:focus) + span {
+input:placeholder-shown + span {
   position: relative;
   top: -2em;
   left: 2em;
   color: var(--color-pureblack);
   font-size: 1em;
+  transition: .5s;
+  user-select: none;
+  z-index: 1;
 }
 
-input + span {
+input + span,
+input:focus + span {
   position: relative;
   top: -4em;
   left: 2em;
   color: var(--color-pureblack);
   font-size: .8em;
-  transition:  .5s;
+  transition: .5s;
+  user-select: none;
+  z-index: 1;
 }
 
+label {
+  display: none;
+}
 </style>
