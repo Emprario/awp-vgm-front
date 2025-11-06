@@ -2,9 +2,11 @@
 import axios from 'axios'
 import FloatingButton from '@/components/FloatingButton.vue'
 import QuestionComponent from '@/components/QuestionComponent.vue'
+import PostBox from '@/components/PostBox.vue'
+import AnswerComponent from '@/components/AnswerComponent.vue'
 
 export default {
-  components: { FloatingButton, QuestionComponent },
+  components: { AnswerComponent, FloatingButton, QuestionComponent, PostBox },
 
   data() {
     return {
@@ -22,15 +24,19 @@ export default {
             {
               id_question: '',
               is_correct: '',
-              statement: ''
+              statement: '',
             },
-          ]
+          ],
         },
       ],
       newPost: {
         id_post: '',
         title: '',
         content: '',
+        plays: 0,
+        isPlayed: false,
+        publish_date: '',
+        publisher: '',
         qsetArray: '',
       },
 
@@ -44,26 +50,26 @@ export default {
   },
   methods: {
     async fetchPosts() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await axios.get('http://localhost:3000/post', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      this.posts = response.data;
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.posts = response.data
     },
     async addPost() {
-      const token = localStorage.getItem('token');
-      this.newPost.qsetArray = this.newQcm;
+      const token = localStorage.getItem('token')
+      this.newPost.qsetArray = this.newQcm
 
       await axios.post('http://localhost:3000/post', this.newPost, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+        headers: { Authorization: `Bearer ${token}` },
+      })
       this.newPost = {
         id_post: '',
         title: '',
         content: '',
-        plays:'',
+        plays: 0,
         qsetArray: '',
-      };
+      }
       this.newQcm = [
         {
           id_qset: '',
@@ -74,43 +80,81 @@ export default {
             {
               id_question: '',
               is_correct: '',
-              statement: ''
+              statement: '',
             },
-          ]
+          ],
         },
-      ];
+      ]
 
       const response = await axios.get('http://localhost:3000/post', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      this.posts = response.data;
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.posts = response.data
+      for (const post of this.posts) {
+        const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        post.isPlayed = plays.data.isPlayed
+        post.plays = plays.data.amount
+      }
     },
-    async addAnswer(){
-      console.log(this.newPost.content);
-      const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:3000/post/${this.selectedPost.id_post}`, { content: this.newPost.content }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      this.newPost.content = '';
-      this.selectPost(this.selectedPost);
+    async addAnswer() {
+      console.log(this.newPost.content)
+      const token = localStorage.getItem('token')
+      await axios.post(
+        `http://localhost:3000/post/${this.selectedPost.id_post}`,
+        { content: this.newPost.content },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+      this.newPost.content = ''
+      this.selectPost(this.selectedPost)
     },
     toggleIsAnswering() {
-      console.log('toggleIsAnswering');
-      this.isAnswering = !this.isAnswering;
+      console.log('toggleIsAnswering')
+      this.isAnswering = !this.isAnswering
     },
     toggleIsCreatingPost() {
-      this.isCreatingPost = !this.isCreatingPost;
+      this.isCreatingPost = !this.isCreatingPost
+    },
+    async togglePlays(post) {
+      const token = localStorage.getItem('token')
+      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      post.isPlayed = plays.data.played
+      if (post.isPlayed) {
+        await axios.delete(`http://localhost:3000/post/${post.id_post}/play`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        post.isPlayed = false
+      } else {
+        await axios.post(`http://localhost:3000/post/${post.id_post}/play`, '', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        post.isPlayed = true
+      }
+      const playsUpdate = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      post.plays = playsUpdate.data.amount
     },
     async selectPost(post) {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await axios.get(`http://localhost:3000/post/${post.id_post}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log(response);
-      this.selectedPost = response.data.post[0];
-      this.selectedAnswer = response.data.replies;
-      this.selectedQCM = response.data.qset;
-      this.isAnswering = true;
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      console.log(response)
+      this.selectedPost = response.data.post[0]
+      this.selectedAnswer = response.data.replies
+      this.selectedQCM = response.data.qset
+      this.isAnswering = true
+      this.selectedPost.plays = plays.data.amount
+      this.selectedPost.isPlayed = plays.data.played
     },
     addQuestion() {
       this.newQcm.push({
@@ -124,103 +168,95 @@ export default {
     },
   },
   async mounted() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     const response = await axios.get('http://localhost:3000/post', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    this.posts = response.data;
-
-  }
- };
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    this.posts = response.data
+    for (const post of this.posts) {
+      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      post.isPlayed = plays.data.played
+      post.plays = plays.data.amount
+      console.log(post.isPlayed)
+    }
+  },
+}
 </script>
 
 <template>
-<div id="homePage">
-  <!-- GET ALL POSTS -->
-  <div id="postsContainer" class="mainComponent" v-if="!isCreatingPost & !isAnswering">
-    <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">+</FloatingButton>
-    <div class="post" v-for="post in posts" @click="selectPost(post)">
-      <h2>{{post.title}}</h2>
-      <p>{{post.content}}</p>
-      <hr class="separator">
-      <div id="utilsPostBar">
-        <div>
-          <svg
-            class="playButton"
-            onclick="this.classList.toggle('active')"
-            @click.stop
-            xmlns="http://www.w3.org/2000/svg"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-        </div>
-        <p class="textLabel">fes</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- REPLY -->
-  <div id="answersContainer" class="mainComponent" v-if="!isCreatingPost && isAnswering">
-    <div id="headPost" class="post">
-      <h2>{{selectedPost.title}}</h2>
-      <p>{{selectedPost.content}}</p>
-    </div>
-    <button class="typeSubmit">Do the QCM</button>
-
-    <div id="answersPost">
-      <p class="textLabel">Comments :</p>
-      <div class="post" v-for="answer in selectedAnswer">
-        <p>{{answer.post[0].content}}</p>
-      </div>
-    </div>
-  </div>
-  <div id="answerBar" class="mainComponent" v-if="isAnswering & !isCreatingPost">
-    <form class="mainSearchZone" @submit.prevent="addAnswer">
-      <label>Reply :</label>
-      <input class="searchTextZone" v-model="newPost.content">
-      <button class="typeSubmit">Reply</button>
-    </form>
-  </div>
-
-  <!-- ADD POST -->
-  <div id="newPost" v-if="isCreatingPost">
-    <div id="creationPost" class="mainComponent">
-      <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
-      <div id="labelPostForm">
-        <label class="title1">Title</label>
-        <input type="text" class="normalInputText" v-model="newPost.title">
-
-        <label class="title1">Content</label>
-        <input type="text" class="normalInputText" v-model="newPost.content">
-      </div>
-      <button class="typeSubmit" @click="addPost">New Post</button>
-    </div>
-    <!-- Create QCM -->
-    <div id="creationQCM" class="mainComponent">
-      <h2 class="title1">QCM</h2>
-      <div v-for="(question, index) in newQcm" :key="index">
-        <QuestionComponent
-            :question="question"
-            :index="index"
-            @remove="removeQuestion(index)"
+  <div id="homePage">
+    <!-- GET ALL POSTS -->
+    <div id="postsContainer" class="mainComponent" v-if="!isCreatingPost & !isAnswering">
+      <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">+</FloatingButton>
+      <div class="post" v-for="post in posts" @click="selectPost(post)">
+        <PostBox
+          :post="post"
+          @togglePlays="togglePlays(post)"
         />
       </div>
-      <div id="buttonsQCM">
-        <button class="typeSubmit" type="button" @click="addQuestion">+ Add Question</button>
+    </div>
+
+    <!-- REPLY -->
+    <div id="answersContainer" class="mainComponent" v-if="!isCreatingPost && isAnswering">
+      <div class="post">
+        <PostBox
+          :post="selectedPost"
+          @togglePlays="togglePlays(selectedPost)"
+        />
+      </div>
+      <button class="typeSubmit">Do the QCM</button>
+
+      <div id="answersPost">
+        <p class="textLabel">Comments :</p>
+        <div class="post" v-for="answer in selectedAnswer">
+          <p>{{ answer.post[0].content }}</p>
+        </div>
+      </div>
+    </div>
+    <div id="answerBar" class="mainComponent" v-if="isAnswering & !isCreatingPost">
+      <form class="mainSearchZone" @submit.prevent="addAnswer">
+        <label>Reply :</label>
+        <input class="searchTextZone" v-model="newPost.content" />
+        <button class="typeSubmit">Reply</button>
+      </form>
+    </div>
+
+    <!-- ADD POST -->
+    <div id="newPost" v-if="isCreatingPost">
+      <div id="creationPost" class="mainComponent">
+        <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
+        <div id="labelPostForm">
+          <label class="title1">Title</label>
+          <input type="text" class="normalInputText" v-model="newPost.title" />
+
+          <label class="title1">Content</label>
+          <input type="text" class="normalInputText" v-model="newPost.content" />
+        </div>
+        <button class="typeSubmit" @click="addPost">New Post</button>
+      </div>
+      <!-- Create QCM -->
+      <div id="creationQCM" class="mainComponent">
+        <h2 class="title1">QCM</h2>
+        <div v-for="(question, index) in newQcm" :key="index">
+          <QuestionComponent :question="question" :index="index" @remove="removeQuestion(index)" />
+        </div>
+        <div id="buttonsQCM">
+          <button class="typeSubmit" type="button" @click="addQuestion">+ Add Question</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped>
 /* ===== GENERAL ===== */
-*{
+* {
   box-sizing: border-box;
 }
-#homePage, #creationPost {
+#homePage,
+#creationPost {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -240,13 +276,13 @@ export default {
   gap: var(--spacing-lg);
   height: 100%;
 }
-#creationPost form{
+#creationPost form {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
 }
-#creationPost form div{
+#creationPost form div {
   display: flex;
   flex-direction: column;
 }
@@ -257,17 +293,18 @@ export default {
 }
 
 /* ===== POSTS CONTAINER ===== */
-#postsContainer, #answersContainer {
+#postsContainer,
+#answersContainer {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   width: 100%;
   height: 100%;
 }
-.post *{
+.post * {
   margin: 0;
 }
-.post{
+.post {
   display: flex;
   flex-direction: column;
   padding: var(--spacing-md);
@@ -277,11 +314,8 @@ export default {
   background-color: var(--bg-item-primary);
   color: #e0e0e0;
 }
-.post:hover{
+.post:hover {
   background-color: var(--bg-item-hover-primary);
-}
-.post h2{
-  color: var(--main-primary);
 }
 
 /* ===== ANSWER ===== */
@@ -293,26 +327,4 @@ export default {
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
 }
-
-/* ===== UTILS POSTS BAR */
-.playButton {
-  width:var(--spacing-xl);
-  height:var(--spacing-xl);
-  fill:none;
-  stroke:var(--secondary-primary);
-  transition: all 0.3s ease;
-}
-.playButton.active {
-  fill: var(--secondary-primary);
-  transform: scale(1.1);
-}
-#utilsPostBar {
-  display: flex;
-  justify-content: space-between;
-}
-#utilsPostBar div {
-  display: flex;
-  gap: var(--spacing-xs);
-}
-
 </style>
