@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <div>
     <fieldset class="pr-15 pf-15 flex-col justify-center">
       <legend class="text-2xl">Login</legend>
@@ -9,13 +9,12 @@
       <input class="flex p-2 w-full row" name="password" type="password" placeholder=""/>
       <span>Password</span>
       <br>
-      <input type="submit">Login to THE VGF</input>
-    </fieldset> 
+      <input class="typeSubmit" type="submit">
+    </fieldset>
   </div>
 </template>
 
 <script>
-
 </script>
 
 <style lang="css" scoped>
