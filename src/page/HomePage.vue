@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios'
+import { useRoute } from 'vue-router'
 import FloatingButton from '@/components/FloatingButton.vue'
 import QuestionComponent from '@/components/QuestionComponent.vue'
 import PostBox from '@/components/PostBox.vue'
@@ -7,11 +8,18 @@ import AnswerComponent from '@/components/AnswerComponent.vue'
 
 export default {
   components: { AnswerComponent, FloatingButton, QuestionComponent, PostBox },
+  props: {
+    id: String,
+    vgs: Object,
+  },
 
   data() {
     return {
       // Posts
       posts: [],
+
+      // VGs
+      listVg : [],
 
       // New Post
       newQcm: [
@@ -23,7 +31,7 @@ export default {
           questionArray: [
             {
               id_question: '',
-              is_correct: '',
+              is_correct: false,
               statement: '',
             },
           ],
@@ -38,6 +46,7 @@ export default {
         publish_date: '',
         publisher: '',
         qsetArray: '',
+        vgd: [],
       },
 
       // UI States
@@ -50,11 +59,36 @@ export default {
   },
   methods: {
     async fetchPosts() {
+      console.log(this.id)
+      var response;
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:3000/post', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      if (this.id === "0"){
+        response = await axios.get('http://localhost:3000/post', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
+      else {
+        response = await axios.get(`http://localhost:3000/post/?gs=${this.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      }
       this.posts = response.data
+      for (const post of this.posts) {
+        const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        post.isPlayed = plays.data.played
+        post.plays = plays.data.amount
+        console.log(this.id)
+      }
+    },
+    async fetchVGs() {
+      const token = localStorage.getItem('token')
+      const VGS = await axios.get('http://localhost:3000/vgd', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      this.listVg = VGS.data;
     },
     async addPost() {
       const token = localStorage.getItem('token')
@@ -63,12 +97,14 @@ export default {
       await axios.post('http://localhost:3000/post', this.newPost, {
         headers: { Authorization: `Bearer ${token}` },
       })
+      console.log("azi requete de merde la")
       this.newPost = {
         id_post: '',
         title: '',
         content: '',
         plays: 0,
         qsetArray: '',
+        vgd: [],
       }
       this.newQcm = [
         {
@@ -86,10 +122,7 @@ export default {
         },
       ]
 
-      const response = await axios.get('http://localhost:3000/post', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      this.posts = response.data
+      await this.fetchPosts();
       for (const post of this.posts) {
         const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -102,7 +135,7 @@ export default {
       console.log(this.newPost.content)
       const token = localStorage.getItem('token')
       await axios.post(
-        `http://localhost:3000/post/${this.selectedPost.id_post}`,
+        `http://localhost:3000/post/${this.selectedPost.id_post}/reply`,
         { content: this.newPost.content },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -115,7 +148,8 @@ export default {
       console.log('toggleIsAnswering')
       this.isAnswering = !this.isAnswering
     },
-    toggleIsCreatingPost() {
+    async toggleIsCreatingPost() {
+      await this.fetchVGs();
       this.isCreatingPost = !this.isCreatingPost
     },
     async togglePlays(post) {
@@ -141,6 +175,7 @@ export default {
       post.plays = playsUpdate.data.amount
     },
     async selectPost(post) {
+      console.log(post)
       const token = localStorage.getItem('token')
       const response = await axios.get(`http://localhost:3000/post/${post.id_post}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -149,12 +184,26 @@ export default {
         headers: { Authorization: `Bearer ${token}` },
       })
       console.log(response)
-      this.selectedPost = response.data.post[0]
+      this.selectedPost = response.data.post
       this.selectedAnswer = response.data.replies
       this.selectedQCM = response.data.qset
       this.isAnswering = true
       this.selectedPost.plays = plays.data.amount
       this.selectedPost.isPlayed = plays.data.played
+    },
+    toggleInSelectedVGs(vg) {
+      const index = this.newPost.vgd.indexOf(vg.id_vg);
+
+      if (index !== -1) {
+        // déjà dedans → enlever
+        this.newPost.vgd.splice(index, 1);
+      } else {
+        // pas dedans → ajouter
+        this.newPost.vgd.push(vg.id_vg);
+      }
+    },
+    isInSelectedVGs(vg) {
+      return this.newPost.vgd.indexOf(vg.id_vg) !== -1;
     },
     addQuestion() {
       this.newQcm.push({
@@ -169,19 +218,18 @@ export default {
   },
   async mounted() {
     const token = localStorage.getItem('token')
-    const response = await axios.get('http://localhost:3000/post', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    this.posts = response.data
-    for (const post of this.posts) {
-      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      post.isPlayed = plays.data.played
-      post.plays = plays.data.amount
-      console.log(post.isPlayed)
-    }
+    await this.fetchVGs();
+    await this.fetchPosts();
+
   },
+  watch: {
+    id: {
+      immediate: true, // optionnel si tu veux relancer aussi au montage
+      handler(newId, oldId) {
+        this.fetchPosts()
+      }
+    }
+  }
 }
 </script>
 
@@ -207,11 +255,10 @@ export default {
         />
       </div>
       <button class="typeSubmit">Do the QCM</button>
-
       <div id="answersPost">
         <p class="textLabel">Comments :</p>
         <div class="post" v-for="answer in selectedAnswer">
-          <p>{{ answer.post[0].content }}</p>
+          <p>{{ answer.post.content }}</p>
         </div>
       </div>
     </div>
@@ -227,12 +274,24 @@ export default {
     <div id="newPost" v-if="isCreatingPost">
       <div id="creationPost" class="mainComponent">
         <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
+        <!-- General informations -->
         <div id="labelPostForm">
           <label class="title1">Title</label>
           <input type="text" class="normalInputText" v-model="newPost.title" />
 
           <label class="title1">Content</label>
           <input type="text" class="normalInputText" v-model="newPost.content" />
+        </div>
+        <!-- VGs selection -->
+        <div id="VGsDisplay">
+          <div v-for="vg in this.listVg">
+            <div class="VG"
+                 @click="toggleInSelectedVGs(vg)"
+                 :class="{ selected: this.isInSelectedVGs(vg) === true }">
+              <img :src="vg.image_link" class="icon" />
+              <span>{{ vg.name }}</span>
+            </div>
+          </div>
         </div>
         <button class="typeSubmit" @click="addPost">New Post</button>
       </div>
@@ -263,6 +322,9 @@ export default {
   height: 100%;
   gap: var(--spacing-md);
 }
+#homePage {
+  min-height: 0;
+}
 /* ====== QCM ====== */
 #creationQCM {
   display: flex;
@@ -292,6 +354,35 @@ export default {
   gap: var(--spacing-md);
 }
 
+#VGsDisplay {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+}
+.VG {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-primary);
+  background-color: var(--bg-item-primary);
+  padding: var(--spacing-md) 12px;
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
+  box-sizing: border-box;
+  border: 2px solid transparent;
+}
+.VG:hover{
+  background-color: var(--bg-button-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+.VG.selected {
+  background-color: var(--bg-button-hover);   /* même couleur que le hover */
+  border: 2px solid var(--main-primary);    /* la bordure que tu veux */
+  color: var(--text-primary);
+  transform: scale(0.9);
+}
+
 /* ===== POSTS CONTAINER ===== */
 #postsContainer,
 #answersContainer {
@@ -300,28 +391,20 @@ export default {
   gap: var(--spacing-md);
   width: 100%;
   height: 100%;
+  flex: 1;            /* occupe l’espace disponible */
+  min-height: 0;
+  overflow: hidden;
+  overflow-y: auto;
 }
-.post * {
-  margin: 0;
-}
-.post {
-  display: flex;
-  flex-direction: column;
-  padding: var(--spacing-md);
-  width: 100%;
-  gap: var(--spacing-xs);
-  border-radius: var(--radius-lg);
-  background-color: var(--bg-item-primary);
-  color: #e0e0e0;
-}
-.post:hover {
-  background-color: var(--bg-item-hover-primary);
-}
+
 
 /* ===== ANSWER ===== */
 #answersPost {
   display: flex;
   flex-direction: column;
+  flex: 1;            /* prend tout l’espace dispo dans answersContainer */
+  min-height: 0;       /* NE PAS retirer */
+  overflow-y: auto;    /* scroll interne */
   gap: var(--spacing-md);
   border: 1px solid var(--main-primary);
   padding: var(--spacing-md);

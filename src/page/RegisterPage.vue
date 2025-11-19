@@ -72,4 +72,7 @@ export default {
   font-size: 0.9rem;
   text-align: left;
 }
+#registerPage * {
+  margin: var(--spacing-xs);
+}
 </style>

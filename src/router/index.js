@@ -3,13 +3,23 @@ import ProfilUser from "../page/ProfilPage.vue";
 import LoginUser from "../page/LoginPage.vue";
 import RegisterUser from "../page/RegisterPage.vue";
 import HomePage from "../page/HomePage.vue";
+import CreateVG from "../page/CreateVG.vue";
 
 const routes = [
   { path: '/', redirect: '/login' },
-  { path: '/home', component: HomePage },
   { path: '/profil', component: ProfilUser },
   { path: '/login', component: LoginUser },
   { path: '/register', component: RegisterUser },
+  { path: '/createVg', component: CreateVG },
+  {
+    path: '/vg/:id',
+    name: 'vgPage',
+    component: () => import('@/page/HomePage.vue'),
+    props: route => ({
+      id: route.params.id,
+      vg: history.state.vg   // 👈 récupération automatique
+    })
+  },
 ]
 
 export default createRouter({
