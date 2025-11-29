@@ -266,7 +266,7 @@ export default {
             @togglePlays="togglePlays(post)"
           />
         </div>
-        <button @click.stop="delPost(post.id_post)" class="normalButton1">🗑️</button>
+        <button v-if="this.isManager" @click.stop="delPost(post.id_post)" class="normalButton1">🗑️</button>
       </div>
     </div>
 
