@@ -20,8 +20,6 @@ export default {
       // Posts
       posts: [],
 
-      session: null,
-
       // New Post
       newQcm: [
         {
@@ -227,7 +225,6 @@ export default {
     },
     setQCMFalse(){
       this.isDoingQCM = false;
-      this.session = null;
     },
     async delPost(postId){
       const token = localStorage.getItem('token')
@@ -313,7 +310,6 @@ export default {
         <QCMComposent
           :qcm="this.selectedQCM"
           :idPost="this.selectedPost.id_post"
-          :session="this.session"
         />
       </div>
     </div>

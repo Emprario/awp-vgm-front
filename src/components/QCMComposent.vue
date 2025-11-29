@@ -6,7 +6,6 @@ export default {
   props: {
     idPost: Number,
     qcm: Object,
-    session: Number,
   },
 
   data() {
@@ -16,6 +15,7 @@ export default {
       selectedAnswers: [],
       answersChecked: false,
       isFinished: false,
+      session: null,
     }
   },
   methods: {
@@ -64,6 +64,7 @@ export default {
       this.colorAnswers(response.data.data)
     },
     colorAnswers(data) {
+      console.log("cacaprout", data)
       data.forEach((answer, index) => {
         const el = this.$refs['answer' + index][0] // Vue 3 renvoie une array
 

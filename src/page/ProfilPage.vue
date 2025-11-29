@@ -49,6 +49,7 @@ export default {
         headers: { Authorization: `Bearer ${token}` }
       })
       await this.fetchMyPosts()
+      this.selectedPost = null;
     },
     selectPost(post){
       if (this.selectedPost === post) {
