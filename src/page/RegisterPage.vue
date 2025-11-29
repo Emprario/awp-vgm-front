@@ -1,26 +1,25 @@
 <template>
   <div id="registerPage" class="mainComponent">
-    <h2 class="title1">Créer un compte</h2>
+    <div>
+      <h2 class="title1">Create an Account</h2>
 
-    <form @submit.prevent="register">
       <label>Username</label>
-      <input v-model="username" type="text" class="normalInputText"/>
+      <input v-model="username" type="text" class="normalInputText" placeholder="username"/>
 
       <label>Email</label>
-      <input v-model="email" type="email" class="normalInputText"/>
+      <input v-model="email" type="email" class="normalInputText" placeholder="email"/>
 
-      <label>Mot de passe</label>
-      <input v-model="password" type="password" class="normalInputText"/>
+      <label>Password</label>
+      <input v-model="password" type="password" class="normalInputText" placeholder="password"/>
+    </div>
 
-      <button type="submit" class="typeSubmit">
-        S'inscrire
-      </button>
-    </form>
-
-    <p>
-      Déjà un compte ?
-      <router-link to="/login" class="normalLink">Se connecter</router-link>
-    </p>
+    <div id="buttonsAdmin">
+      <p>
+        Already have an Account ?
+        <router-link to="/login" class="normalLink">Login</router-link>
+      </p>
+      <button @click="register" type="submit" class="typeSubmit">Register</button>
+    </div>
   </div>
 </template>
 
@@ -41,7 +40,7 @@ export default {
       try {
         await axios.post('http://localhost:3000/auth/sign-in', {
           username: this.username,
-          email: this.email,
+          mail: this.email,
           password: this.password
         })
         alert('✅ Compte créé avec succès !')
@@ -58,12 +57,14 @@ export default {
   box-sizing: border-box;
 }
 #registerPage {
+  display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 400px;
   margin: 70px auto;
   padding: var(--spacing-xl);
   height: auto;
+  justify-content: space-between;
 }
 
 #registerPage label, #registerPage p {
@@ -74,5 +75,8 @@ export default {
 }
 #registerPage * {
   margin: var(--spacing-xs);
+}
+#buttonsAdmin button {
+  width: 100%;
 }
 </style>

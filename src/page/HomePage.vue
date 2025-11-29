@@ -1,13 +1,15 @@
 <script>
 import axios from 'axios'
-import { useRoute } from 'vue-router'
+import { eventBus } from '@/eventBus'
 import FloatingButton from '@/components/FloatingButton.vue'
 import QuestionComponent from '@/components/QuestionComponent.vue'
 import PostBox from '@/components/PostBox.vue'
 import AnswerComponent from '@/components/AnswerComponent.vue'
+import QCMComposent from '@/components/QCMComposent.vue'
+import PostCreation from '@/components/postCreationComponent.vue'
 
 export default {
-  components: { AnswerComponent, FloatingButton, QuestionComponent, PostBox },
+  components: { AnswerComponent, FloatingButton, QuestionComponent, PostBox, QCMComposent, PostCreation },
   props: {
     id: String,
     vgs: Object,
@@ -18,8 +20,7 @@ export default {
       // Posts
       posts: [],
 
-      // VGs
-      listVg : [],
+      session: null,
 
       // New Post
       newQcm: [
@@ -52,25 +53,42 @@ export default {
       // UI States
       isAnswering: false,
       isCreatingPost: false,
+      isDoingQCM: false,
+      isManager: false,
+      isAdmin: false,
       selectedPost: null,
       selectedQCM: null,
       selectedAnswer: null,
     }
   },
   methods: {
-    async fetchPosts() {
-      console.log(this.id)
+    async fetchPosts(searchKey) {
       var response;
       const token = localStorage.getItem('token')
-      if (this.id === "0"){
-        response = await axios.get('http://localhost:3000/post', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+      if (searchKey){
+        console.log(searchKey);
+        if (this.id === "0"){
+          response = await axios.get(`http://localhost:3000/post/?q=${searchKey}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        }
+        else {
+          response = await axios.get(`http://localhost:3000/post/?gs=${this.id}&q=${searchKey}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        }
       }
-      else {
-        response = await axios.get(`http://localhost:3000/post/?gs=${this.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+      else{
+        if (this.id === "0"){
+          response = await axios.get('http://localhost:3000/post', {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        }
+        else {
+          response = await axios.get(`http://localhost:3000/post/?gs=${this.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        }
       }
       this.posts = response.data
       for (const post of this.posts) {
@@ -79,8 +97,15 @@ export default {
         })
         post.isPlayed = plays.data.played
         post.plays = plays.data.amount
-        console.log(this.id)
       }
+    },
+    async fetchMe() {
+      const token = localStorage.getItem('token')
+      const me = await axios.get('http://localhost:3000/user/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.isManager = me.data.roles.includes("manager");
+      this.isAdmin = me.data.roles.includes("sysadmin")
     },
     async fetchVGs() {
       const token = localStorage.getItem('token')
@@ -97,7 +122,6 @@ export default {
       await axios.post('http://localhost:3000/post', this.newPost, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      console.log("azi requete de merde la")
       this.newPost = {
         id_post: '',
         title: '',
@@ -132,7 +156,6 @@ export default {
       }
     },
     async addAnswer() {
-      console.log(this.newPost.content)
       const token = localStorage.getItem('token')
       await axios.post(
         `http://localhost:3000/post/${this.selectedPost.id_post}/reply`,
@@ -145,7 +168,6 @@ export default {
       this.selectPost(this.selectedPost)
     },
     toggleIsAnswering() {
-      console.log('toggleIsAnswering')
       this.isAnswering = !this.isAnswering
     },
     async toggleIsCreatingPost() {
@@ -183,27 +205,12 @@ export default {
       const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      console.log(response)
       this.selectedPost = response.data.post
       this.selectedAnswer = response.data.replies
       this.selectedQCM = response.data.qset
       this.isAnswering = true
       this.selectedPost.plays = plays.data.amount
       this.selectedPost.isPlayed = plays.data.played
-    },
-    toggleInSelectedVGs(vg) {
-      const index = this.newPost.vgd.indexOf(vg.id_vg);
-
-      if (index !== -1) {
-        // déjà dedans → enlever
-        this.newPost.vgd.splice(index, 1);
-      } else {
-        // pas dedans → ajouter
-        this.newPost.vgd.push(vg.id_vg);
-      }
-    },
-    isInSelectedVGs(vg) {
-      return this.newPost.vgd.indexOf(vg.id_vg) !== -1;
     },
     addQuestion() {
       this.newQcm.push({
@@ -215,12 +222,29 @@ export default {
     removeQuestion(index) {
       this.newQcm.splice(index, 1)
     },
+    async setQCM(post){
+      this.isDoingQCM = true;
+    },
+    setQCMFalse(){
+      this.isDoingQCM = false;
+      this.session = null;
+    },
+    async delPost(postId){
+      const token = localStorage.getItem('token')
+      await axios.delete(`http://localhost:3000/post/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.fetchPosts()
+    },
   },
   async mounted() {
     const token = localStorage.getItem('token')
     await this.fetchVGs();
     await this.fetchPosts();
-
+    await this.fetchMe();
+    eventBus.on("fetchPosts", (searchKey) => {
+      this.fetchPosts(searchKey);
+    });
   },
   watch: {
     id: {
@@ -238,36 +262,60 @@ export default {
     <!-- GET ALL POSTS -->
     <div id="postsContainer" class="mainComponent" v-if="!isCreatingPost & !isAnswering">
       <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">+</FloatingButton>
-      <div class="post" v-for="post in posts" @click="selectPost(post)">
-        <PostBox
-          :post="post"
-          @togglePlays="togglePlays(post)"
-        />
+      <div id="post" v-for="post in posts" @click="selectPost(post)">
+        <div class="post">
+          <PostBox
+            :post="post"
+            @togglePlays="togglePlays(post)"
+          />
+        </div>
+        <button @click.stop="delPost(post.id_post)" class="normalButton1">🗑️</button>
       </div>
     </div>
 
     <!-- REPLY -->
-    <div id="answersContainer" class="mainComponent" v-if="!isCreatingPost && isAnswering">
-      <div class="post">
-        <PostBox
-          :post="selectedPost"
-          @togglePlays="togglePlays(selectedPost)"
-        />
-      </div>
-      <button class="typeSubmit">Do the QCM</button>
-      <div id="answersPost">
-        <p class="textLabel">Comments :</p>
-        <div class="post" v-for="answer in selectedAnswer">
-          <p>{{ answer.post.content }}</p>
+    <div id="selectedPostPage" v-if="!isCreatingPost && isAnswering">
+      <div id="leftSelectPostPage" >
+        <div id="answersContainer" class="mainComponent" >
+          <div class="post">
+            <PostBox
+              :post="selectedPost"
+              @togglePlays="togglePlays(selectedPost)"
+            />
+          </div>
+          <button class="typeSubmit" @click="setQCM(this.selectedPost)" v-if="!isDoingQCM">Do the MCQ</button>
+          <button class="typeSubmit" @click="setQCMFalse" v-if="isDoingQCM">Stop the MCQ</button>
+          <div id="answersPost">
+            <p class="textLabel">Comments :</p>
+            <div id="answer" class="post" v-for="answer in selectedAnswer">
+              <p>{{ answer.post.content }}</p>
+              <p class="textLabel">{{ new Date(answer.post.publish_date).toLocaleString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              }) }}</p>
+              <p class="textLabel">{{answer.post.publisher}}</p>
+            </div>
+          </div>
+        </div>
+        <div id="answerBar" class="mainComponent" v-if="isAnswering & !isCreatingPost">
+          <form id="replyBar" class="mainSearchZone" @submit.prevent="addAnswer">
+            <label>Reply :</label>
+            <input class="searchTextZone" v-model="newPost.content" />
+            <button class="typeSubmit">Reply</button>
+          </form>
         </div>
       </div>
-    </div>
-    <div id="answerBar" class="mainComponent" v-if="isAnswering & !isCreatingPost">
-      <form class="mainSearchZone" @submit.prevent="addAnswer">
-        <label>Reply :</label>
-        <input class="searchTextZone" v-model="newPost.content" />
-        <button class="typeSubmit">Reply</button>
-      </form>
+      <!-- DO THE MCQ -->
+      <div class="mainComponent" id="rightSelectedPostPage" v-if="!isCreatingPost && isAnswering && isDoingQCM">
+        <QCMComposent
+          :qcm="this.selectedQCM"
+          :idPost="this.selectedPost.id_post"
+          :session="this.session"
+        />
+      </div>
     </div>
 
     <!-- ADD POST -->
@@ -275,24 +323,9 @@ export default {
       <div id="creationPost" class="mainComponent">
         <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
         <!-- General informations -->
-        <div id="labelPostForm">
-          <label class="title1">Title</label>
-          <input type="text" class="normalInputText" v-model="newPost.title" />
-
-          <label class="title1">Content</label>
-          <input type="text" class="normalInputText" v-model="newPost.content" />
-        </div>
-        <!-- VGs selection -->
-        <div id="VGsDisplay">
-          <div v-for="vg in this.listVg">
-            <div class="VG"
-                 @click="toggleInSelectedVGs(vg)"
-                 :class="{ selected: this.isInSelectedVGs(vg) === true }">
-              <img :src="vg.image_link" class="icon" />
-              <span>{{ vg.name }}</span>
-            </div>
-          </div>
-        </div>
+        <PostCreation
+          :post="this.newPost"
+        />
         <button class="typeSubmit" @click="addPost">New Post</button>
       </div>
       <!-- Create QCM -->
@@ -313,6 +346,7 @@ export default {
 /* ===== GENERAL ===== */
 * {
   box-sizing: border-box;
+
 }
 #homePage,
 #creationPost {
@@ -325,11 +359,19 @@ export default {
 #homePage {
   min-height: 0;
 }
+
+#post {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+}
 /* ====== QCM ====== */
 #creationQCM {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  overflow-y: auto;
+  height: 100%;
 }
 
 /* ===== CREATION POST ===== */
@@ -353,11 +395,11 @@ export default {
   flex-direction: column;
   gap: var(--spacing-md);
 }
-
 #VGsDisplay {
   display: flex;
   flex-direction: row;
   gap: var(--spacing-md);
+  flex-wrap: wrap;
 }
 .VG {
   display: flex;
@@ -384,8 +426,7 @@ export default {
 }
 
 /* ===== POSTS CONTAINER ===== */
-#postsContainer,
-#answersContainer {
+#postsContainer, #answersContainer {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
@@ -396,7 +437,28 @@ export default {
   overflow: hidden;
   overflow-y: auto;
 }
-
+#selectedPostPage {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  height: 100%;
+}
+#leftSelectPostPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  height: 100%;
+  width: 100%;
+}
+#rightSelectedPostPage {
+  display: flex;
+  width: 100%;
+}
+#answer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 
 /* ===== ANSWER ===== */
 #answersPost {
@@ -409,5 +471,42 @@ export default {
   border: 1px solid var(--main-primary);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  * {
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #newPost {
+    flex-direction: column;
+    height: 100%;
+  }
+  #creationPost {
+    height: auto;
+  }
+  #creationQCM {
+    height: auto;
+  }
+  #replyBar {
+    display: flex;
+  }
+  #replyBar input {
+    width: 100%;
+  }
+  #replyBar label {
+    width: auto;
+  }
+  #replyBar button {
+    width: auto;
+  }
+  #selectedPostPage {
+    flex-direction: column;
+  }
+  .VG img {
+    width: auto;
+  }
 }
 </style>

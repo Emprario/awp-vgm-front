@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios'
+import { eventBus } from '@/eventBus'
 
 export default{
   data(){
@@ -9,7 +10,8 @@ export default{
         image_link: '',
         release_date: '',
         description: '',
-      }
+      },
+      selectedVG: null,
     }
   },
   methods: {
@@ -18,43 +20,119 @@ export default{
       await axios.post('http://localhost:3000/vgd', this.newVg, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      this.$emit('refresh-vg');
-    }
+      eventBus.emit('refreshVg');
+    },
+    async updateVG(){
+      console.log(this.newVg)
+      const token = localStorage.getItem('token')
+      await axios.put(`http://localhost:3000/vgd/${this.selectedVG.id_vg}`, this.newVg, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      eventBus.emit('refreshVg');
+    },
+    async deleteVG(VGId){
+      const token = localStorage.getItem('token')
+      await axios.delete(`http://localhost:3000/vgd/${VGId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.selectedVG = null;
+      this.newVg = {
+        name: '',
+        image_link: '',
+        release_date: '',
+        description: '',
+      };
+      eventBus.emit('refreshVg');
+    },
+  },
+  mounted() {
+    eventBus.on('vgSelected', (vg) => {
+      if (vg !== null){
+        this.selectedVG = vg;
+        this.newVg = vg;
+        this.newVg.release_date = vg.release_date ? vg.release_date.substring(0, 10) : ''
+      }
+      else {
+        this.selectedVG = null;
+        this.newVg = {
+          name: '',
+          image_link: '',
+          release_date: '',
+          description: '',
+        };
+      }
+    });
   }
 }
 </script>
 
 <template>
-  <div class="mainComponent" id="createVG">
-    <h2 class="title1">ADD Video Game</h2>
+    <div class="mainComponent" id="createVG">
+      <div>
+        <h2 class="title1" v-if="!this.selectedVG">ADD Video Game</h2>
+        <h2 class="title1" v-if="this.selectedVG">Update Video Game</h2>
 
-    <label class="textLabel">Name</label>
-    <input v-model="newVg.name" type="text" placeholder="Name of the video game" class="normalInputText" />
+        <label class="textLabel">Name</label>
+        <input
+          v-model="newVg.name"
+          type="text"
+          placeholder="Name of the video game"
+          class="normalInputText"
+        />
 
-    <label class="textLabel">Image-Link</label>
-    <input v-model="newVg.image_link" type="text" placeholder="Link of the image" class="normalInputText" />
+        <label class="textLabel">Image-Link</label>
+        <input
+          v-model="newVg.image_link"
+          type="text"
+          placeholder="Link of the image"
+          class="normalInputText"
+        />
 
-    <label class="textLabel">Release Date</label>
-    <input v-model="newVg.release_date" type="text" placeholder="Release date of the video game" class="normalInputText" />
+        <label class="textLabel">Release Date</label>
+        <input
+          v-model="newVg.release_date"
+          type="date"
+          class="normalInputText"
+        />
 
-    <label class="textLabel">Description</label>
-    <input v-model="newVg.description" type="text" placeholder="Quick description of the video game" class="normalInputText" />
+        <label class="textLabel">Description</label>
+        <input
+          v-model="newVg.description"
+          type="text"
+          placeholder="Quick description of the video game"
+          class="normalInputText"
+        />
 
-    <button @click="addVg" class="typeSubmit">Add Vg</button>
-  </div>
+      </div>
+      <div id="buttonsAdmin">
+        <button v-if="!this.selectedVG" @click="addVg" class="typeSubmit">Add Vg</button>
+        <button v-if="this.selectedVG" @click="updateVG" class="typeSubmit">Update Vg</button>
+        <button v-if="this.selectedVG" @click="deleteVG(this.newVg.id_vg)" class="typeDelete">Delete Vg</button>
+      </div>
+    </div>
 </template>
 
 <style scoped>
-*{
+* {
   box-sizing: border-box;
 }
 #createVG {
+  display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 400px;
+  margin: 70px auto;
   padding: var(--spacing-xl);
   height: auto;
+  justify-content: space-between;
 }
 #createVG * {
   margin: var(--spacing-xs);
+}
+#buttonsAdmin {
+  display: flex;
+}
+#buttonsAdmin button {
+  width: 100%;
 }
 </style>

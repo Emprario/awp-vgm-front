@@ -4,13 +4,23 @@ import LoginUser from "../page/LoginPage.vue";
 import RegisterUser from "../page/RegisterPage.vue";
 import HomePage from "../page/HomePage.vue";
 import CreateVG from "../page/CreateVG.vue";
+import ManageRoles from '@/page/ManageRoles.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/profil', component: ProfilUser },
   { path: '/login', component: LoginUser },
   { path: '/register', component: RegisterUser },
-  { path: '/createVg', component: CreateVG },
+  {
+    path: '/manageRoles',
+    name: 'ManageRoles',
+    component: ManageRoles,
+  },
+  {
+    path: '/createVg',
+    name: 'CreateVG',
+    component: CreateVG,
+  },
   {
     path: '/vg/:id',
     name: 'vgPage',

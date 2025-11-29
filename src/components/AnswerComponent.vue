@@ -7,7 +7,7 @@
       v-model="answer.statement"
     />
     <input type="checkbox" v-model="answer.is_correct" />
-    <button class="typeNormal" type="button" @click="$emit('remove')">🗑</button>
+    <button class="normalButton1" type="button" @click="$emit('remove')">🗑</button>
   </div>
 </template>
 
