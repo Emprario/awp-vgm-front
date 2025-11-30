@@ -12,7 +12,7 @@ export default {
   methods: {
     async addRole(){
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:3000/vgd', {
+      await axios.post('http://localhost:3000/user/assign', {
         username: this.username,
         role: this.role,
       }, {
@@ -31,7 +31,7 @@ export default {
       <input v-model="username" type="text" placeholder="Username" class="normalInputText" />
 
       <label class="textLabel">Role</label>
-      <input v-model="role" type="text" placeholder="Password" class="normalInputText" />
+      <input v-model="role" type="text" placeholder="Role" class="normalInputText" />
 
     </div>
     <div id="buttonsAdmin">

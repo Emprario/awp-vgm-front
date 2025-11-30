@@ -218,14 +218,13 @@ header {
 #content{
   display: flex;
   flex-direction: row;
-  min-height: var(--height-lg);
+  min-height: 0;
 }
 #mainContent{
   width: 100%;
   display: flex;
   margin: var(--spacing-xl);
-  min-height: 100%;
-
+  min-height: 0;
 }
 
 

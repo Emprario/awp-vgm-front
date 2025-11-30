@@ -16,6 +16,7 @@ export default {
       answersChecked: false,
       isFinished: false,
       session: null,
+      score: null,
     }
   },
   methods: {
@@ -89,8 +90,16 @@ export default {
         this.indexCurrentQuestion = this.indexCurrentQuestion + 1
       } else {
         this.isFinished = true
+        this.getScore()
       }
     },
+    async getScore() {
+      const token = localStorage.getItem('token')
+      const response = await axios.get(`http://localhost:3000/session/${this.session}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.score = response.data.score
+    }
   },
   mounted() {
     console.log(this.qcm)
@@ -118,8 +127,14 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="isFinished">
-      <p class="title1">The MCQ is Finished</p>
+    <div id="finished" v-if="isFinished">
+      <h2 class="title1">The MCQ is Finished</h2>
+      <div id="scoreContainer">
+        <div id="score">
+          <p>Your score</p>
+          <p>{{this.score}}</p>
+        </div>
+      </div>
     </div>
     <button class="typeSubmit" v-if="!answersChecked && !isFinished" @click="checkAnswer">
       Check Answer
@@ -172,4 +187,57 @@ export default {
 #answers p {
   margin: var(--spacing-xs);
 }
+#finished {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-lg);
+  animation: fadeIn 0.4s ease-out;
+  height: 100%;
+  justify-content: center;
+}
+
+/* Carte centrale */
+#scoreContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+#score {
+  background: linear-gradient(135deg, var(--main-primary), var(--bg-item-primary));
+  padding: calc(var(--spacing-lg) * 1.5);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  color: white;
+  min-width: 220px;
+
+  /* Animation légère */
+  transform: scale(1);
+  animation: popIn 0.35s ease-out;
+}
+
+#score p:first-child {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+#score p:last-child {
+  font-size: 2.8rem;
+  font-weight: bold;
+  margin-top: var(--spacing-xs);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 </style>

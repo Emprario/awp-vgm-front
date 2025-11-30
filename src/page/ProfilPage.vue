@@ -44,6 +44,10 @@ export default {
       await this.fetchMyPosts()
     },
     async updatePost(){
+      if (this.selectedPost.vgd.length === 0) {
+        alert("You must put at least one Video Game's tag")
+        return
+      }
       const token = localStorage.getItem('token')
       await axios.put(`http://localhost:3000/post/${this.selectedPost.id_post}`, this.selectedPost, {
         headers: { Authorization: `Bearer ${token}` }
@@ -69,8 +73,14 @@ export default {
 
 <template>
 <div id="profilPage">
-  <div class="mainComponent" v-if="!selectedPost">
+  <div id="myInfos" class="mainComponent" v-if="!selectedPost">
     <h2 class="title1">Profil</h2>
+    <div id="infosGen">
+      <p class="textLabel">Username</p>
+      <p class="post">{{this.me.username}}</p>
+      <p class="textLabel">Email</p>
+      <p class="post">{{this.me.mail}}</p>
+    </div>
   </div>
   <div id="updatePost" class="mainComponent" v-if="selectedPost">
     <div id="topUpdatePost">
@@ -109,6 +119,8 @@ export default {
   width: 100%;
   gap: var(--spacing-lg);
 }
+
+/* ===== MY POSTS ===== */
 #myPosts {
   display: flex;
   flex-direction: column;
@@ -128,6 +140,10 @@ export default {
 }
 #myPost div {
   width: 100%;
+}
+#myPost:hover {
+  transform: scale(0.995);
+  transition: var(--transition-slow);
 }
 
 /* ===== UPDATE ===== */
@@ -149,6 +165,21 @@ export default {
 }
 #updatePostButtons button {
   width: 100%;
+}
+
+/* ===== MY INFOS ===== */
+#myInfos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+#infosGen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+#infosGen p{
+  margin: 0;
 }
 
 /* ===== RESPONSIVE ===== */

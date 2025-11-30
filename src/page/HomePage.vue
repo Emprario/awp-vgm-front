@@ -114,6 +114,10 @@ export default {
       this.listVg = VGS.data;
     },
     async addPost() {
+      if (this.newPost.title === '' || this.newPost.content === '' || this.newPost.vgd.length === 0) {
+        alert("You must fill all the fields\nAnd don't forget the Video Game Tag")
+        return
+      }
       const token = localStorage.getItem('token')
       this.newPost.qsetArray = this.newQcm
 
@@ -154,6 +158,9 @@ export default {
       }
     },
     async addAnswer() {
+      if (this.newPost.content === ''){
+        return;
+      }
       const token = localStorage.getItem('token')
       await axios.post(
         `http://localhost:3000/post/${this.selectedPost.id_post}/reply`,
@@ -209,6 +216,12 @@ export default {
       this.isAnswering = true
       this.selectedPost.plays = plays.data.amount
       this.selectedPost.isPlayed = plays.data.played
+    },
+    setIsAnsweringFalse(){
+      this.selectedPost = null
+      this.selectedAnswer = null
+      this.selectedQCM = null
+      this.isAnswering = false
     },
     addQuestion() {
       this.newQcm.push({
@@ -274,7 +287,7 @@ export default {
     <div id="selectedPostPage" v-if="!isCreatingPost && isAnswering">
       <div id="leftSelectPostPage" >
         <div id="answersContainer" class="mainComponent" >
-          <div class="post">
+          <div class="post" @click="setIsAnsweringFalse">
             <PostBox
               :post="selectedPost"
               @togglePlays="togglePlays(selectedPost)"
@@ -351,15 +364,21 @@ export default {
   width: 100%;
   height: 100%;
   gap: var(--spacing-md);
+  min-height: 0;
 }
 #homePage {
   min-height: 0;
+  height: 100%;
 }
 
 #post {
   display: flex;
   flex-direction: row;
   gap: var(--spacing-xs);
+}
+#post:hover {
+  transform: scale(0.995);
+  transition: var(--transition-slow);
 }
 /* ====== QCM ====== */
 #creationQCM {
@@ -368,6 +387,7 @@ export default {
   gap: var(--spacing-md);
   overflow-y: auto;
   height: 100%;
+  min-height: 0;
 }
 
 /* ===== CREATION POST ===== */
@@ -375,6 +395,7 @@ export default {
   display: flex;
   gap: var(--spacing-lg);
   height: 100%;
+  min-height: 0;
 }
 #creationPost form {
   display: flex;
@@ -386,40 +407,6 @@ export default {
   display: flex;
   flex-direction: column;
 }
-#labelPostForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-#VGsDisplay {
-  display: flex;
-  flex-direction: row;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-}
-.VG {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--text-primary);
-  background-color: var(--bg-item-primary);
-  padding: var(--spacing-md) 12px;
-  border-radius: var(--radius-md);
-  transition: var(--transition-normal);
-  box-sizing: border-box;
-  border: 2px solid transparent;
-}
-.VG:hover{
-  background-color: var(--bg-button-hover);
-  color: var(--text-primary);
-  transform: translateY(-2px);
-}
-.VG.selected {
-  background-color: var(--bg-button-hover);   /* même couleur que le hover */
-  border: 2px solid var(--main-primary);    /* la bordure que tu veux */
-  color: var(--text-primary);
-  transform: scale(0.9);
-}
 
 /* ===== POSTS CONTAINER ===== */
 #postsContainer, #answersContainer {
@@ -430,7 +417,6 @@ export default {
   height: 100%;
   flex: 1;            /* occupe l’espace disponible */
   min-height: 0;
-  overflow: hidden;
   overflow-y: auto;
 }
 #selectedPostPage {
@@ -438,6 +424,7 @@ export default {
   flex-direction: row;
   gap: var(--spacing-md);
   height: 100%;
+  min-height: 0;
 }
 #leftSelectPostPage {
   display: flex;
@@ -445,10 +432,12 @@ export default {
   gap: var(--spacing-md);
   height: 100%;
   width: 100%;
+  min-height: 0;
 }
 #rightSelectedPostPage {
   display: flex;
   width: 100%;
+  min-height: 0;
 }
 #answer {
   display: flex;
