@@ -74,5 +74,20 @@ export default {
 #buttonsQuestion {
   display: flex;
   justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+#buttonsQuestion button {
+  width: 100%;
+}
+@media (max-width: 768px) {
+  * {
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #buttonsQuestion button {
+    font-size: 0.85rem;
+  }
 }
 </style>

@@ -113,4 +113,33 @@ export default {
   color: var(--text-primary);
   transform: scale(0.9);
 }
+
+@media (max-width: 768px) {
+  * {
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #creationPost {
+    height: auto;
+    flex-shrink: 0;
+  }
+  #replyBar input {
+    width: 100%;
+  }
+  #replyBar label {
+    width: auto;
+  }
+  #replyBar button {
+    width: auto;
+  }
+  #VGsDisplay {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  .VG img, .VG span, .VG {
+    width: auto;
+  }
+}
 </style>

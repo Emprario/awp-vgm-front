@@ -93,7 +93,7 @@
       <section class="rule-block">
         <h2 class="title2">10. Follow Staff Instructions</h2>
         <p class="rule-text">
-          • Moderators may edit, move, or delete posts.<br>
+          • Moderators may delete posts.<br>
           • Repeated violations may lead to sanctions.
         </p>
       </section>

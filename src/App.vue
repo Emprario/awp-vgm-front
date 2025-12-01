@@ -12,7 +12,7 @@
       </div>
       <div id="searchPostBar">
         <input id="searchBar" v-model="searchKey" type="text" placeholder="Search any post...">
-        <button class="typeSubmit" @click="emitSearch">Search</button>
+        <button id="searchButton" class="typeSubmit" @click="emitSearch">Search</button>
       </div>
       <div class="roleTools">
         <RouterLink class="adminButton" to="/createVg" v-if="isManager">Manage VG's</RouterLink>
@@ -244,6 +244,18 @@ header {
 }
 
 @media (max-width: 768px) {
+
+  .adminButton {
+    font-size: 0.70rem;
+  }
+
+  .roleTools {
+    gap: 2px;
+  }
+  #searchButton {
+    font-size: 0.75rem;
+    padding: var(--spacing-md);
+  }
 
   .burgerButton {
     display: block; /* Le bouton apparaît */

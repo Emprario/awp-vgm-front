@@ -19,6 +19,16 @@ export default {
         headers: { Authorization: `Bearer ${token}` },
       })
     },
+    async deleteRole() {
+      const token = localStorage.getItem('token')
+      await axios.delete('http://localhost:3000/user/assign', {
+        headers: { Authorization: `Bearer ${token}` },
+        data: {        // 👈 ici, c’est correct
+          username: this.username,
+          role: this.role,
+        }
+      })
+    },
   }
 }
 </script>
@@ -36,6 +46,7 @@ export default {
     </div>
     <div id="buttonsAdmin">
       <button @click="addRole" class="typeSubmit">Add Role</button>
+      <button @click="deleteRole" class="typeDelete">Delete Role</button>
     </div>
   </div>
 </template>
@@ -59,7 +70,10 @@ export default {
 #manageRolesPage * {
   margin: var(--spacing-xs);
 }
-
+#buttonsAdmin {
+  display: flex;
+  flex-direction: row;
+}
 #buttonsAdmin button {
   width: 100%;
 }

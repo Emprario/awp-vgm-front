@@ -490,6 +490,11 @@ export default {
     width: 100%;
     box-sizing: border-box;
   }
+  #creationPost, #creationQCM {
+    width: 100%;
+    min-height: auto;      /* laisse la hauteur s'adapter au contenu */
+    max-height: none;      /* supprime la contrainte de height fixe */
+  }
   #newPost {
     flex-direction: column;
     height: 100%;
@@ -499,6 +504,7 @@ export default {
   }
   #creationQCM {
     height: auto;
+    flex-grow: 0;
   }
   #replyBar {
     display: flex;
