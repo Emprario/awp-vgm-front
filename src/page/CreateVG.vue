@@ -72,7 +72,7 @@ export default{
         <h2 class="title1" v-if="!this.selectedVG">ADD Video Game</h2>
         <h2 class="title1" v-if="this.selectedVG">Update Video Game</h2>
 
-        <label class="textLabel">Name</label>
+        <label class="title2">Name</label>
         <input
           v-model="newVg.name"
           type="text"
@@ -80,7 +80,7 @@ export default{
           class="normalInputText"
         />
 
-        <label class="textLabel">Image-Link</label>
+        <label class="title2">Image-Link</label>
         <input
           v-model="newVg.image_link"
           type="text"
@@ -88,14 +88,14 @@ export default{
           class="normalInputText"
         />
 
-        <label class="textLabel">Release Date</label>
+        <label class="title2">Release Date</label>
         <input
           v-model="newVg.release_date"
           type="date"
           class="normalInputText"
         />
 
-        <label class="textLabel">Description</label>
+        <label class="title2">Description</label>
         <input
           v-model="newVg.description"
           type="text"

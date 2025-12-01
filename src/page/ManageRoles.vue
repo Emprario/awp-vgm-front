@@ -27,10 +27,10 @@ export default {
   <div id="manageRolesPage" class="mainComponent">
     <div>
       <h2 class="title1">Manage Roles</h2>
-      <label class="textLabel">Username</label>
+      <label class="title2">Username</label>
       <input v-model="username" type="text" placeholder="Username" class="normalInputText" />
 
-      <label class="textLabel">Role</label>
+      <label class="title2">Role</label>
       <input v-model="role" type="text" placeholder="Role" class="normalInputText" />
 
     </div>
