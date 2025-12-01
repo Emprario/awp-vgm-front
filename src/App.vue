@@ -6,12 +6,15 @@
       <button class="burgerButton" @click="toggleSidebar">
         ☰
       </button>
-      <RouterLink class="adminButton" to="/profil">Profil</RouterLink>
+      <div class="roleTools">
+        <RouterLink class="adminButton" to="/profil">Profil</RouterLink>
+        <RouterLink class="adminButton" to="/rules">Rules</RouterLink>
+      </div>
       <div id="searchPostBar">
         <input id="searchBar" v-model="searchKey" type="text" placeholder="Search any post...">
         <button class="typeSubmit" @click="emitSearch">Search</button>
       </div>
-      <div id="roleTools">
+      <div class="roleTools">
         <RouterLink class="adminButton" to="/createVg" v-if="isManager">Manage VG's</RouterLink>
         <RouterLink class="adminButton" to="/manageRoles" v-if="isAdmin">Manage Roles</RouterLink>
       </div>
@@ -166,7 +169,7 @@ header {
 .adminButton:hover {
   background-color: var(--bg-theme-dark);
 }
-#roleTools {
+.roleTools {
   display: flex;
   gap: var(--spacing-xs);
 }

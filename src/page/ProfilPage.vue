@@ -25,8 +25,16 @@ export default {
         })
         post.isPlayed = plays.data.played
         post.plays = plays.data.amount
-        console.log(this.id)
+        await this.getSignals(post)
       }
+    },
+    async getSignals(post){
+      const token = localStorage.getItem('token')
+      const signals = await axios.get(`http://localhost:3000/post/${post.id_post}/signal`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      post.isSignaled = signals.data.signaled
+      post.signals = signals.data.amount
     },
     async getMe(){
       const token = localStorage.getItem('token')
@@ -63,6 +71,13 @@ export default {
         this.selectedPost = post;
       }
     },
+    async logOut(){
+      localStorage.removeItem('token')
+      this.me = null
+      this.posts = []
+      this.selectedPost = null
+      this.$router.push('/login')
+    },
   },
   async mounted() {
     await this.getMe();
@@ -76,10 +91,11 @@ export default {
   <div id="myInfos" class="mainComponent" v-if="!selectedPost">
     <h2 class="title1">Profil</h2>
     <div id="infosGen">
-      <p class="textLabel">Username</p>
+      <p class="title2">Username</p>
       <p class="post">{{this.me.username}}</p>
-      <p class="textLabel">Email</p>
+      <p class="title2">Email</p>
       <p class="post">{{this.me.mail}}</p>
+      <button class="typeDelete" @click="logOut">LogOut</button>
     </div>
   </div>
   <div id="updatePost" class="mainComponent" v-if="selectedPost">

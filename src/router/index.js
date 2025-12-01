@@ -5,10 +5,12 @@ import RegisterUser from "../page/RegisterPage.vue";
 import HomePage from "../page/HomePage.vue";
 import CreateVG from "../page/CreateVG.vue";
 import ManageRoles from '@/page/ManageRoles.vue'
+import RulesPage from '@/page/RulesPage.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/profil', component: ProfilUser },
+  { path: '/rules', component: RulesPage },
   { path: '/login', component: LoginUser },
   { path: '/register', component: RegisterUser },
   {

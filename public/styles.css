@@ -215,6 +215,11 @@ header {
   margin: 0;
   text-align: left;
 }
+.title2 {
+  margin: 0;
+  color: var(--main-secondary);
+  font-size: 1.4rem;
+}
 .textLabel {
   margin: 0;
   color: var(--secondary-primary);

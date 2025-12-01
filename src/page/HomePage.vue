@@ -41,7 +41,9 @@ export default {
         title: '',
         content: '',
         plays: 0,
+        signals: 0,
         isPlayed: false,
+        isSignaled: false,
         publish_date: '',
         publisher: '',
         qsetArray: '',
@@ -95,6 +97,7 @@ export default {
         })
         post.isPlayed = plays.data.played
         post.plays = plays.data.amount
+        await this.getSignals(post)
       }
     },
     async fetchMe() {
@@ -201,6 +204,24 @@ export default {
       })
       post.plays = playsUpdate.data.amount
     },
+    async signal(post){
+      const token = localStorage.getItem('token')
+      if (!post.isSignaled) {
+        await axios.post(`http://localhost:3000/post/${post.id_post}/signal`, '', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        post.isSignaled = true
+      }
+      await this.getSignals(post)
+    },
+    async getSignals(post){
+      const token = localStorage.getItem('token')
+      const signals = await axios.get(`http://localhost:3000/post/${post.id_post}/signal`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      post.isSignaled = signals.data.signaled
+      post.signals = signals.data.amount
+    },
     async selectPost(post) {
       console.log(post)
       const token = localStorage.getItem('token')
@@ -216,6 +237,7 @@ export default {
       this.isAnswering = true
       this.selectedPost.plays = plays.data.amount
       this.selectedPost.isPlayed = plays.data.played
+      await this.getSignals(this.selectedPost)
     },
     setIsAnsweringFalse(){
       this.selectedPost = null
@@ -277,6 +299,7 @@ export default {
           <PostBox
             :post="post"
             @togglePlays="togglePlays(post)"
+            @signal="signal(post)"
           />
         </div>
         <button v-if="this.isManager" @click.stop="delPost(post.id_post)" class="normalButton1">🗑️</button>
@@ -291,6 +314,7 @@ export default {
             <PostBox
               :post="selectedPost"
               @togglePlays="togglePlays(selectedPost)"
+              @signal="signal(selectedPost)"
             />
           </div>
           <button class="typeSubmit" @click="setQCM(this.selectedPost)" v-if="!isDoingQCM">Do the MCQ</button>
@@ -332,6 +356,7 @@ export default {
       <div id="creationPost" class="mainComponent">
         <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
         <!-- General informations -->
+        <h2 class="title1">Post</h2>
         <PostCreation
           :post="this.newPost"
         />

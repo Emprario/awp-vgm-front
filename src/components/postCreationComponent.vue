@@ -43,13 +43,13 @@ export default {
 <template>
   <div id="creationPost">
     <div id="labelPostForm">
-      <label class="title1">Title</label>
+      <label class="title2">Title</label>
       <input type="text" class="normalInputText" v-model="this.post.title" />
 
-      <label class="title1">Content</label>
+      <label class="title2">Content</label>
       <input type="text" class="normalInputText" v-model="this.post.content" />
     </div>
-    <label class="title1">VG's Tags</label>
+    <label class="title2">VG's Tags</label>
     <div id="VGsDisplay">
       <div id="1VG" v-for="vg in this.listVg">
         <div class="VG"

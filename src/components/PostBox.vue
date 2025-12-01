@@ -25,6 +25,11 @@ export default {
         <path d="M8 5v14l11-7z"/>
       </svg>
       <p>{{post.plays}}</p>
+      <p id="signals"
+         @click.stop
+         @click="$emit('signal')"
+         :style="{ backgroundColor: post.isSignaled ? '#a0a9c2' : '' }">Signals</p>
+      <p>{{post.signals}}</p>
     </div>
     <p class="textLabel">
       {{ new Date(post.publish_date).toLocaleString('fr-FR', {
@@ -57,5 +62,9 @@ h2 {
 #utilsPostBar div {
   display: flex;
   gap: var(--spacing-xs);
+}
+#signals {
+  border: 1px solid var(--secondary-primary);
+  border-radius: var(--spacing-xs);
 }
 </style>
