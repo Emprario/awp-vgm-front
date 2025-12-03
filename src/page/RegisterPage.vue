@@ -32,11 +32,41 @@ export default {
     return {
       username: '',
       email: '',
-      password: ''
+      password: '',
+
+      maxUsernameLength: 20,
+      maxPasswordLength: 50,
+      maxEmailLength: 50,
     }
   },
   methods: {
+    isValidEmail(email) {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      return regex.test(email)
+    },
     async register() {
+      // Check email
+      if (!this.isValidEmail(this.email)) {
+        alert("❌ Please enter a valid email.")
+        return
+      }
+      // Check if others inputs are fields
+      if (!this.username || !this.password) {
+        alert("❌ All fields are required.")
+        return
+      }
+      if (this.username.length > this.maxUsernameLength) {
+        alert(`Your username cannot exceed ${this.maxUsernameLength} characters.`);
+        return;
+      }
+      if (this.email.length > this.maxEmailLength) {
+        alert(`Your mail cannot exceed ${this.maxEmailLength} characters.`);
+        return;
+      }
+      if (this.password.length > this.maxPasswordLength) {
+        alert(`Your password cannot exceed ${this.maxPasswordLength} characters.`);
+        return;
+      }
       try {
         await axios.post('http://localhost:3000/auth/sign-in', {
           username: this.username,

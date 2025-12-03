@@ -7,6 +7,7 @@ import PostBox from '@/components/PostBox.vue'
 import AnswerComponent from '@/components/AnswerComponent.vue'
 import QCMComposent from '@/components/QCMComposent.vue'
 import PostCreation from '@/components/postCreationComponent.vue'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   components: { AnswerComponent, FloatingButton, QuestionComponent, PostBox, QCMComposent, PostCreation },
@@ -19,6 +20,9 @@ export default {
     return {
       // Posts
       posts: [],
+
+      // Me
+      me: null,
 
       // New Post
       newQcm: [
@@ -50,6 +54,12 @@ export default {
         vgd: [],
       },
 
+      //QCM Params
+      maxTitleLength: 45,
+      maxContentLength: 500,
+      maxQuestionsLength: 45,
+      maxAnswersLength: 45,
+
       // UI States
       isAnswering: false,
       isCreatingPost: false,
@@ -68,19 +78,19 @@ export default {
       if (searchKey){
         console.log(searchKey);
         if (this.id === "0"){
-          response = await axios.get(`http://localhost:3000/post/?q=${searchKey}`, {
+          response = await axios.get(http_proto+domain+`/post/?q=${searchKey}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         }
         else {
-          response = await axios.get(`http://localhost:3000/post/?gs=${this.id}&q=${searchKey}`, {
+          response = await axios.get(http_proto+domain+`/post/?gs=${this.id}&q=${searchKey}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         }
       }
       else{
         if (this.id === "0"){
-          response = await axios.get('http://localhost:3000/post', {
+          response = await axios.get(http_proto+domain+'/post', {
             headers: { Authorization: `Bearer ${token}` },
           })
         }
@@ -105,6 +115,7 @@ export default {
       const me = await axios.get('http://localhost:3000/user/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
+      this.me = me.data
       this.isManager = me.data.roles.includes("manager");
       this.isAdmin = me.data.roles.includes("sysadmin")
     },
@@ -120,6 +131,51 @@ export default {
       if (this.newPost.title === '' || this.newPost.content === '' || this.newPost.vgd.length === 0) {
         alert("You must fill all the fields\nAnd don't forget the Video Game Tag")
         return
+      }
+      if (this.newPost.title.length > this.maxTitleLength) {
+        alert(`The title cannot exceed ${this.maxTitleLength} characters.`);
+        return;
+      }
+      if (this.newPost.content.length > this.maxContentLength) {
+        alert(`The content cannot exceed ${this.maxContentLength} characters.`);
+        return;
+      }
+      if (this.newQcm.length < 1) {
+        alert("You must have at least one question !");
+        return;
+      }
+
+      for (const question of this.newQcm){
+        let nbGoodAnswers = 0;
+        if (question.prompt.length > this.maxQuestionsLength) {
+          alert(`One question exceed ${this.maxQuestionsLength} characters.`);
+          return;
+        }
+        if (question.prompt.length < 1) {
+          alert(`All the question must be filled`);
+          return;
+        }
+        if (question.questionArray.length < 2) {
+          alert(`All the questions must contain at least 2 answers.`);
+          return;
+        }
+        for (const answer of question.questionArray){
+          if (answer.statement.length > this.maxAnswersLength) {
+            alert(`An answer cannot exceed ${this.maxAnswersLength} characters.`);
+            return;
+          }
+          if (answer.statement.length < 1) {
+            alert(`All the answers must be filled`);
+            return;
+          }
+          if (answer.is_correct) {
+            nbGoodAnswers += 1;
+          }
+        }
+        if (nbGoodAnswers < 1) {
+          alert(`All the questions must have at least 1 good answer.`);
+          return;
+        }
       }
       const token = localStorage.getItem('token')
       this.newPost.qsetArray = this.newQcm
@@ -159,6 +215,7 @@ export default {
         post.isPlayed = plays.data.isPlayed
         post.plays = plays.data.amount
       }
+      this.isCreatingPost = false
     },
     async addAnswer() {
       if (this.newPost.content === ''){
@@ -248,7 +305,7 @@ export default {
     addQuestion() {
       this.newQcm.push({
         id_question: '',
-        statement: '',
+        prompt: '',
         questionArray: [],
       })
     },
@@ -266,7 +323,23 @@ export default {
       await axios.delete(`http://localhost:3000/post/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
+      this.isAnswering = false
+      this.isCreatingPost = false
+      this.isDoingQCM = false
+      this.selectedPost = null
+      this.selectedQCM = null
+      this.selectedAnswer = null
       this.fetchPosts()
+    },
+    async delAnswer(answer){
+      const token = localStorage.getItem('token')
+      await axios.delete(`http://localhost:3000/post/${answer.post.id_post}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      await this.selectPost(this.selectedPost)
+    },
+    isMyAnswer(answer){
+      return answer.post.publisher === this.me.username
     },
   },
   async mounted() {
@@ -276,6 +349,15 @@ export default {
     await this.fetchMe();
     eventBus.on("fetchPosts", (searchKey) => {
       this.fetchPosts(searchKey);
+    });
+    eventBus.on("refreshPage", (searchKey) => {
+      this.isAnswering = false
+      this.isCreatingPost = false
+      this.isDoingQCM = false
+      this.selectedPost = null
+      this.selectedQCM = null
+      this.selectedAnswer = null
+      this.fetchPosts()
     });
   },
   watch: {
@@ -294,6 +376,10 @@ export default {
     <!-- GET ALL POSTS -->
     <div id="postsContainer" class="mainComponent" v-if="!isCreatingPost & !isAnswering">
       <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">+</FloatingButton>
+      <div v-if="posts.length === 0" class="noPosts">
+        <p class="title1">There are no posts corresponding</p>
+        <p class="title2">Try searching others things or somewhere esle</p>
+      </div>
       <div id="post" v-for="post in posts" @click="selectPost(post)">
         <div class="post">
           <PostBox
@@ -302,7 +388,6 @@ export default {
             @signal="signal(post)"
           />
         </div>
-        <button v-if="this.isManager" @click.stop="delPost(post.id_post)" class="normalButton1">🗑️</button>
       </div>
     </div>
 
@@ -310,27 +395,34 @@ export default {
     <div id="selectedPostPage" v-if="!isCreatingPost && isAnswering">
       <div id="leftSelectPostPage" >
         <div id="answersContainer" class="mainComponent" >
-          <div class="post" @click="setIsAnsweringFalse">
-            <PostBox
-              :post="selectedPost"
-              @togglePlays="togglePlays(selectedPost)"
-              @signal="signal(selectedPost)"
-            />
+          <div class="postAndDelete">
+            <div class="post" @click="setIsAnsweringFalse">
+              <PostBox
+                :post="selectedPost"
+                @togglePlays="togglePlays(selectedPost)"
+                @signal="signal(selectedPost)"
+              />
+            </div>
+            <button v-if="this.isManager" @click.stop="delPost(this.selectedPost.id_post)" class="normalButton1">🗑️</button>
+
           </div>
           <button class="typeSubmit" @click="setQCM(this.selectedPost)" v-if="!isDoingQCM">Do the MCQ</button>
           <button class="typeSubmit" @click="setQCMFalse" v-if="isDoingQCM">Stop the MCQ</button>
           <div id="answersPost">
             <p class="textLabel">Comments :</p>
-            <div id="answer" class="post" v-for="answer in selectedAnswer">
-              <p>{{ answer.post.content }}</p>
-              <p class="textLabel">{{ new Date(answer.post.publish_date).toLocaleString('fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-              }) }}</p>
-              <p class="textLabel">{{answer.post.publisher}}</p>
+            <div class="postAndDelete" v-for="answer in selectedAnswer">
+              <div id="answer" class="post">
+                <p>{{ answer.post.content }}</p>
+                <p class="textLabel">{{ new Date(answer.post.publish_date).toLocaleString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric'
+                }) }}</p>
+                <p class="textLabel">{{answer.post.publisher}}</p>
+              </div>
+              <button class="delete" v-if="isMyAnswer(answer)" @click="delAnswer(answer)">🗑️</button>
             </div>
           </div>
         </div>
@@ -464,11 +556,6 @@ export default {
   width: 100%;
   min-height: 0;
 }
-#answer {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
 
 /* ===== ANSWER ===== */
 #answersPost {
@@ -481,6 +568,11 @@ export default {
   border: 1px solid var(--main-primary);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
+}
+#answer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 /* ===== RESPONSIVE ===== */

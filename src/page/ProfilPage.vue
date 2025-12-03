@@ -89,7 +89,7 @@ export default {
 <template>
 <div id="profilPage">
   <div id="myInfos" class="mainComponent" v-if="!selectedPost">
-    <h2 class="title1">Profil</h2>
+    <h2 class="title1">Profile</h2>
     <div id="infosGen">
       <p class="title2">Username</p>
       <p class="post">{{this.me.username}}</p>
@@ -142,6 +142,7 @@ export default {
   flex-direction: column;
   gap: var(--spacing-lg);
   max-height: 620px;
+  height: 100%;
 }
 #myPostsContainer {
   display: flex;

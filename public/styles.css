@@ -144,6 +144,29 @@ header {
 .typeSubmit:active, .typeDelete:active {
   transform: scale(0.98);
 }
+.delete {
+  display: none;           /* caché par défaut */
+  margin-left: 10px;
+  background-color: var(--bg-item-primary);
+  border-radius: var(--spacing-md);
+  border: none;
+  cursor: pointer;
+  color: red;
+  font-size: 1rem;
+}
+.delete:hover {
+  background-color: var(--bg-theme-dark);
+}
+.postAndDelete {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+.postAndDelete * {
+  margin: 0;
+}
+.postAndDelete:hover .delete {
+  display: inline;
+}
 
 /* ===== LINKS ===== */
 .normalLink {

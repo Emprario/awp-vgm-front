@@ -7,10 +7,10 @@
         ☰
       </button>
       <div class="roleTools">
-        <RouterLink class="adminButton" to="/profil">Profil</RouterLink>
+        <RouterLink class="adminButton" to="/profil">Profile</RouterLink>
         <RouterLink class="adminButton" to="/rules">Rules</RouterLink>
       </div>
-      <div id="searchPostBar">
+      <div id="searchPostBar" v-if="showSearchBar">
         <input id="searchBar" v-model="searchKey" type="text" placeholder="Search any post...">
         <button id="searchButton" class="typeSubmit" @click="emitSearch">Search</button>
       </div>
@@ -24,14 +24,14 @@
     <div id="content" @click="sidebarOpen = false">
       <!-- Nav -->
       <nav class="sideBar" :class="{ open: sidebarOpen }">
-        <RouterLink class="typeRouterLink" :key="$route.fullPath"
+        <RouterLink class="typeRouterLink" :key="$route.fullPath" @click.native.prevent="reloadVG"
                     :to="{
             name: 'vgPage',
             params: { id: 0 },
           }">🏠 Home</RouterLink>
         <div id="navBarGames" v-for="vg in listVg" :key="vg.id_vg">
           <div id="navBarGamesInt">
-            <RouterLink class="typeRouterLink"
+            <RouterLink class="typeRouterLink" @click.native.prevent="reloadVG"
                         :to="{
             name: 'vgPage',
             params: { id: vg.id_vg },
@@ -101,6 +101,9 @@ export default {
       }
       eventBus.emit('vgSelected', this.selectedVG);
     },
+    reloadVG (){
+      eventBus.emit('refreshPage', "coucou"); // ou refetchPosts
+    },
   },
   async mounted() {
     const token = localStorage.getItem('token')
@@ -113,6 +116,11 @@ export default {
     });
     await this.fetchVGs();
     await this.fetchMe();
+  },
+  computed: {
+    showSearchBar() {
+      return this.$route.name === 'vgPage'
+    }
   },
 }
 </script>

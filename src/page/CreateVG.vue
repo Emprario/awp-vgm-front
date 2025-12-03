@@ -11,11 +11,28 @@ export default{
         release_date: '',
         description: '',
       },
+
+      maxNameLength: 15,
+      maxLinkLength: 250,
+      maxDescriptionLength: 500,
+
       selectedVG: null,
     }
   },
   methods: {
     async addVg(){
+      if (this.newVg.name.length > this.maxNameLength) {
+        alert(`The name cannot exceed ${this.maxNameLength} characters.`);
+        return;
+      }
+      if (this.newVg.image_link.length > this.maxLinkLength) {
+        alert(`The image link cannot exceed ${this.maxLinkLength} characters.`);
+        return;
+      }
+      if (this.newVg.description.length > this.maxDescriptionLength) {
+        alert(`The description cannot exceed ${this.maxDescriptionLength} characters.`);
+        return;
+      }
       const token = localStorage.getItem('token')
       await axios.post('http://localhost:3000/vgd', this.newVg, {
         headers: { Authorization: `Bearer ${token}` },

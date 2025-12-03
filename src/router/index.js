@@ -11,8 +11,8 @@ const routes = [
   { path: '/', redirect: '/login' },
   { path: '/profil', component: ProfilUser },
   { path: '/rules', component: RulesPage },
-  { path: '/login', component: LoginUser },
-  { path: '/register', component: RegisterUser },
+  { path: '/login', name: 'login', component: LoginUser },
+  { path: '/register', name: 'register', component: RegisterUser },
   {
     path: '/manageRoles',
     name: 'ManageRoles',
@@ -34,7 +34,25 @@ const routes = [
   },
 ]
 
-export default createRouter({
+// 👉 on crée le router dans une variable
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+// 👉 middleware d’authentification
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+
+  // routes accessibles sans être connecté
+  const publicPages = ['login', 'register']
+
+  // si l'utilisateur n'est pas connecté et essaye une page protégée → redirect
+  if (!token && !publicPages.includes(to.name)) {
+    return next('/login')
+  }
+
+  next()
+})
+
+export default router
