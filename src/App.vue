@@ -106,6 +106,7 @@ export default {
     },
   },
   async mounted() {
+    eventBus.emit('setEnv');
     const token = localStorage.getItem('token')
     eventBus.on('setEnv',async () => {
       await this.fetchVGs();
