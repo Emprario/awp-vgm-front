@@ -11,7 +11,7 @@ export default {
 </script>
 
 <style>
-@import "../../public/styles.css";
+@import "../../../../public/styles.css";
 
 #floating-btn {
   width: 40px;

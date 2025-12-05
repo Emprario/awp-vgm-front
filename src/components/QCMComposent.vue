@@ -4,7 +4,7 @@ import axios from 'axios'
 export default {
   name: 'QCMComposent',
   props: {
-    idPost: Number,
+    idPost: String,
     qcm: Object,
   },
 
@@ -17,6 +17,7 @@ export default {
       isFinished: false,
       session: null,
       score: null,
+      avgScore: null,
     }
   },
   methods: {
@@ -65,7 +66,6 @@ export default {
       this.colorAnswers(response.data.data)
     },
     colorAnswers(data) {
-      console.log("cacaprout", data)
       data.forEach((answer, index) => {
         const el = this.$refs['answer' + index][0] // Vue 3 renvoie une array
 
@@ -99,12 +99,19 @@ export default {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.score = response.data.score
+    },
+    async getAvgScore() {
+      const token = localStorage.getItem('token')
+      const response = await axios.get(`http://localhost:3000/post/${this.idPost}/score`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.avgScore  = response.data.AVG_score;
     }
   },
-  mounted() {
-    console.log(this.qcm)
+  async mounted() {
     this.currentQuestion = this.qcm[0]
     this.indexCurrentQuestion = 1
+    await this.getAvgScore()
   },
 }
 </script>
@@ -129,10 +136,14 @@ export default {
     </div>
     <div id="finished" v-if="isFinished">
       <h2 class="title1">The MCQ is Finished</h2>
-      <div id="scoreContainer">
-        <div id="score">
+      <div class="scoreContainer">
+        <div class="score myScore">
           <p>Your score</p>
           <p>{{this.score}}</p>
+        </div>
+        <div class="score avgScore">
+          <p>Average score</p>
+          <p>{{this.avgScore}}</p>
         </div>
       </div>
     </div>
@@ -146,6 +157,7 @@ export default {
 </template>
 
 <style scoped>
+/* ===== GENERAL ===== */
 #QCM {
   display: flex;
   flex-direction: column;
@@ -158,6 +170,8 @@ export default {
   flex-direction: column;
   gap: var(--spacing-lg);
 }
+
+/* ===== QUESTIONS & ANSWERS ===== */
 #QuestAns {
   display: flex;
   flex-direction: column;
@@ -187,6 +201,8 @@ export default {
 #answers p {
   margin: var(--spacing-xs);
 }
+
+/* SCORES */
 #finished {
   display: flex;
   flex-direction: column;
@@ -198,46 +214,25 @@ export default {
   justify-content: center;
 }
 
-/* Carte centrale */
-#scoreContainer {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-#score {
-  background: linear-gradient(135deg, var(--main-primary), var(--bg-item-primary));
-  padding: calc(var(--spacing-lg) * 1.5);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  color: white;
-  min-width: 220px;
-
-  /* Animation légère */
-  transform: scale(1);
-  animation: popIn 0.35s ease-out;
-}
-
-#score p:first-child {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-#score p:last-child {
-  font-size: 2.8rem;
-  font-weight: bold;
-  margin-top: var(--spacing-xs);
-}
-
-/* Animations */
+  /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes popIn {
   0% { transform: scale(0.7); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  * {
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #scoreContainer {
+    flex-direction: column;
+  }
 }
 
 </style>

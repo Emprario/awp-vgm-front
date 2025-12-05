@@ -2,18 +2,21 @@
   <div id="app">
     <!-- HEADER -->
     <header>
-      <!-- Bouton burger pour mobile -->
+      <!-- Burger button for mobile -->
       <button class="burgerButton" @click="toggleSidebar">
         ☰
       </button>
+      <!-- Left Buttons -->
       <div class="roleTools">
         <RouterLink class="adminButton" to="/profil">Profile</RouterLink>
         <RouterLink class="adminButton" to="/rules">Rules</RouterLink>
       </div>
+      <!-- Middle search bar -->
       <div id="searchPostBar" v-if="showSearchBar">
         <input id="searchBar" v-model="searchKey" type="text" placeholder="Search any post...">
         <button id="searchButton" class="typeSubmit" @click="emitSearch">Search</button>
       </div>
+      <!-- Right Buttons (admin) -->
       <div class="roleTools">
         <RouterLink class="adminButton" to="/createVg" v-if="isManager">Manage VG's</RouterLink>
         <RouterLink class="adminButton" to="/manageRoles" v-if="isAdmin">Manage Roles</RouterLink>
@@ -24,13 +27,15 @@
     <div id="content" @click="sidebarOpen = false">
       <!-- Nav -->
       <nav class="sideBar" :class="{ open: sidebarOpen }">
+        <!-- Home Page -->
         <RouterLink class="typeRouterLink" :key="$route.fullPath" @click.native.prevent="reloadVG"
                     :to="{
             name: 'vgPage',
             params: { id: 0 },
           }">🏠 Home</RouterLink>
+        <!-- All the games pages -->
         <div id="navBarGames" v-for="vg in listVg" :key="vg.id_vg">
-          <div id="navBarGamesInt">
+          <div id="navBarGamesInt" class="postAndDelete">
             <RouterLink class="typeRouterLink" @click.native.prevent="reloadVG"
                         :to="{
             name: 'vgPage',
@@ -40,9 +45,15 @@
               <span>{{ vg.name }}</span>
             </RouterLink>
             <button class="normalButton2" v-if="$route.name === 'CreateVG'" @click="selectVG(vg)">✏️</button>
+            <RouterLink class="delete" id="infoVgButton"
+                        :to="{
+            name: 'InfosVg',
+            params: { id: vg.id_vg },
+          }">ℹ</RouterLink>
           </div>
         </div>
       </nav>
+
       <!-- Main -->
       <div id="mainContent">
         <router-view></router-view>
@@ -51,13 +62,14 @@
   </div>
 </template>
 <script>
-import HomePage from '@/page/HomePage.vue'
+import HomePage from '@/page/VGs/HomePage.vue'
+import InfosVg from '@/page/VGs/infosVg.vue'
 import axios from 'axios'
 import { eventBus } from '@/eventBus';
 
 export default {
   name: 'App',
-  components: { HomePage },
+  components: { HomePage, InfosVg },
 
   data(){
     return {
@@ -106,7 +118,6 @@ export default {
     },
   },
   async mounted() {
-    eventBus.emit('setEnv');
     const token = localStorage.getItem('token')
     eventBus.on('setEnv',async () => {
       await this.fetchVGs();
@@ -219,6 +230,14 @@ header {
   background-color: var(--bg-button-hover);
   color: var(--text-primary);
   transform: translateX(2px);
+}
+#infoVgButton {
+  justify-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  margin: 0;
+  text-decoration: none;
+  color: var(--text-primary);
 }
 #navBarGamesInt {
   display: flex;

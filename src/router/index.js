@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ProfilUser from "../page/ProfilPage.vue";
-import LoginUser from "../page/LoginPage.vue";
-import RegisterUser from "../page/RegisterPage.vue";
-import HomePage from "../page/HomePage.vue";
-import CreateVG from "../page/CreateVG.vue";
-import ManageRoles from '@/page/ManageRoles.vue'
+import ProfilUser from "../page/User/ProfilPage.vue";
+import LoginUser from "../page/User/LoginPage.vue";
+import RegisterUser from "../page/User/RegisterPage.vue";
+import HomePage from "../page/VGs/HomePage.vue";
+import CreateVG from "../page/Roles/CreateVG.vue";
+import ManageRoles from '@/page/Roles/ManageRoles.vue'
+import InfosVg from '@/page/VGs/infosVg.vue'
 import RulesPage from '@/page/RulesPage.vue'
 
 const routes = [
@@ -19,6 +20,12 @@ const routes = [
     component: ManageRoles,
   },
   {
+    path: '/infosVg/:id',
+    name: 'InfosVg',
+    component: () => import('@/page/VGs/infosVg.vue'),
+    props: true,
+  },
+  {
     path: '/createVg',
     name: 'CreateVG',
     component: CreateVG,
@@ -26,7 +33,7 @@ const routes = [
   {
     path: '/vg/:id',
     name: 'vgPage',
-    component: () => import('@/page/HomePage.vue'),
+    component: () => import('@/page/VGs/HomePage.vue'),
     props: route => ({
       id: route.params.id,
       vg: history.state.vg   // 👈 récupération automatique

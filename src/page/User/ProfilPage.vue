@@ -1,6 +1,6 @@
 <script>
-import PostBox from '@/components/PostBox.vue'
-import PostCreation from '@/components/postCreationComponent.vue'
+import PostBox from '@/components/Posts/PostBox.vue'
+import PostCreation from '@/components/Posts/postCreationComponent.vue'
 import axios from 'axios'
 
 export default {
@@ -10,6 +10,7 @@ export default {
       posts: [],
       me:'',
       selectedPost: null,
+      lastsScores: [],
     }
   },
   methods: {
@@ -78,26 +79,48 @@ export default {
       this.selectedPost = null
       this.$router.push('/login')
     },
+    async getLastsScores(){
+      const token = localStorage.getItem('token')
+      const response = await axios.get('http://localhost:3000/session', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      this.lastsScores = response.data
+    }
   },
   async mounted() {
     await this.getMe();
     await this.fetchMyPosts();
+    await this.getLastsScores();
   },
 }
 </script>
 
 <template>
 <div id="profilPage">
-  <div id="myInfos" class="mainComponent" v-if="!selectedPost">
-    <h2 class="title1">Profile</h2>
-    <div id="infosGen">
-      <p class="title2">Username</p>
-      <p class="post">{{this.me.username}}</p>
-      <p class="title2">Email</p>
-      <p class="post">{{this.me.mail}}</p>
-      <button class="typeDelete" @click="logOut">LogOut</button>
+  <!-- GENERAL INFOS -->
+  <div id="myGlobalInfos" class="mainComponent" v-if="!selectedPost">
+    <div id="myInfos">
+      <h2 class="title1">Profile</h2>
+      <div id="infosGen">
+        <p class="title2">Username</p>
+        <p class="post">{{this.me.username}}</p>
+        <p class="title2">Email</p>
+        <p class="post">{{this.me.mail}}</p>
+        <button class="typeDelete" @click="logOut">LogOut</button>
+      </div>
+    </div>
+    <div id="myScores">
+      <h2 class="title2">My lasts scores :</h2>
+      <div class="scoreContainer">
+        <div class="score myScore" v-for="(score, index) in lastsScores">
+          <p></p>
+          <p>{{score.score}}</p>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- UPDATE A POST -->
   <div id="updatePost" class="mainComponent" v-if="selectedPost">
     <div id="topUpdatePost">
       <h2 class="title1">Update Post</h2>
@@ -111,6 +134,7 @@ export default {
     </div>
   </div>
 
+  <!-- DISPLAY MY POSTS -->
   <div id="myPosts" class="mainComponent">
     <h2 class="title1">My Posts</h2>
     <div id="myPostsContainer">
@@ -185,6 +209,11 @@ export default {
 }
 
 /* ===== MY INFOS ===== */
+#myGlobalInfos {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 #myInfos {
   display: flex;
   flex-direction: column;
@@ -197,6 +226,11 @@ export default {
 }
 #infosGen p{
   margin: 0;
+}
+#myScores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
 }
 
 /* ===== RESPONSIVE ===== */

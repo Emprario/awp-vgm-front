@@ -22,7 +22,7 @@
 
 <script>
 import axios from 'axios'
-import { eventBus } from '@/eventBus';
+import { eventBus } from '@/eventBus.js';
 
 export default {
   data() {

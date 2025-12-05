@@ -16,7 +16,6 @@ export default {
       const VGS = await axios.get('http://localhost:3000/vgd', {
         headers: { Authorization: `Bearer ${token}` }
       })
-
       this.listVg = VGS.data;
     },
     toggleInSelectedVGs(vg) {

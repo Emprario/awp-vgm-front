@@ -40,8 +40,11 @@ export default {
       <label class="title2">Username</label>
       <input v-model="username" type="text" placeholder="Username" class="normalInputText" />
 
-      <label class="title2">Role</label>
-      <input v-model="role" type="text" placeholder="Role" class="normalInputText" />
+      <select v-model="role" class="normalInputText">
+        <option value="">Choose a role</option>
+        <option value="sysadmin">Admin</option>
+        <option value="manager">Manager</option>
+      </select>
 
     </div>
     <div id="buttonsAdmin">

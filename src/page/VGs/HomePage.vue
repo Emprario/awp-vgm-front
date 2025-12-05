@@ -1,12 +1,12 @@
 <script>
 import axios from 'axios'
-import { eventBus } from '@/eventBus'
-import FloatingButton from '@/components/FloatingButton.vue'
-import QuestionComponent from '@/components/QuestionComponent.vue'
-import PostBox from '@/components/PostBox.vue'
-import AnswerComponent from '@/components/AnswerComponent.vue'
+import { eventBus } from '@/eventBus.js'
+import FloatingButton from '@/components/Utilities/Buttons/FloatingButton.vue'
+import QuestionComponent from '@/components/Posts/QCM/QuestionComponent.vue'
+import PostBox from '@/components/Posts/PostBox.vue'
+import AnswerComponent from '@/components/Posts/QCM/AnswerComponent.vue'
 import QCMComposent from '@/components/QCMComposent.vue'
-import PostCreation from '@/components/postCreationComponent.vue'
+import PostCreation from '@/components/Posts/postCreationComponent.vue'
 import {domain, http_proto} from '@/main.js'
 
 export default {
@@ -446,7 +446,7 @@ export default {
     <!-- ADD POST -->
     <div id="newPost" v-if="isCreatingPost">
       <div id="creationPost" class="mainComponent">
-        <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">-</FloatingButton>
+        <FloatingButton class="typeSubmit" @click="toggleIsCreatingPost">←</FloatingButton>
         <!-- General informations -->
         <h2 class="title1">Post</h2>
         <PostCreation
