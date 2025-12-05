@@ -84,7 +84,12 @@ export default {
       const response = await axios.get('http://localhost:3000/session', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      this.lastsScores = response.data
+      for (const score of response.data) {
+        const Post = await axios.get(`http://localhost:3000/post/${score.id_post}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        this.lastsScores.push({namePost: Post.data.post.title, score: score.score})
+      }
     }
   },
   async mounted() {
@@ -113,7 +118,7 @@ export default {
       <h2 class="title2">My lasts scores :</h2>
       <div class="scoreContainer">
         <div class="score myScore" v-for="(score, index) in lastsScores">
-          <p></p>
+          <p>{{score.namePost}}</p>
           <p>{{score.score}}</p>
         </div>
       </div>
@@ -165,14 +170,14 @@ export default {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  max-height: 620px;
-  height: 100%;
+  max-height: 100%;
 }
 #myPostsContainer {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   overflow-y: auto;
+  height: 100%;
 }
 #myPost {
   display: flex;

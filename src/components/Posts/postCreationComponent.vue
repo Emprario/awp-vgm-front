@@ -46,7 +46,7 @@ export default {
       <input type="text" class="normalInputText" v-model="this.post.title" />
 
       <label class="title2">Content</label>
-      <input type="text" class="normalInputText" v-model="this.post.content" />
+      <textarea class="normalInputText" v-model="this.post.content" />
     </div>
     <label class="title2">VG's Tags</label>
     <div id="VGsDisplay">
@@ -80,6 +80,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  height: 100%;
+}
+#labelPostForm textarea {
+  height: 100%;
 }
 
 /* ===== VGs ===== */

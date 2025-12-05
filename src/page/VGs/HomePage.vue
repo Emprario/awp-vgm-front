@@ -577,26 +577,29 @@ export default {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  * {
+
+  #homePage {
     max-width: 100vw;
     width: 100%;
-    box-sizing: border-box;
+    overflow: auto;
+    min-height: 100%;
   }
-  #creationPost, #creationQCM {
+  #creationPost {
     width: 100%;
     min-height: auto;      /* laisse la hauteur s'adapter au contenu */
-    max-height: none;      /* supprime la contrainte de height fixe */
   }
   #newPost {
     flex-direction: column;
     height: 100%;
+    overflow: auto;
+    min-height: 100%;
   }
   #creationPost {
     height: auto;
   }
   #creationQCM {
-    height: auto;
-    flex-grow: 0;
+    overflow-y: auto;
+    min-height: 100%;
   }
   #replyBar {
     display: flex;

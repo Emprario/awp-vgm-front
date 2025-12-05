@@ -7,17 +7,17 @@
         ☰
       </button>
       <!-- Left Buttons -->
-      <div class="roleTools">
+      <div class="roleTools" @click="sidebarOpen = false">
         <RouterLink class="adminButton" to="/profil">Profile</RouterLink>
         <RouterLink class="adminButton" to="/rules">Rules</RouterLink>
       </div>
       <!-- Middle search bar -->
-      <div id="searchPostBar" v-if="showSearchBar">
+      <div id="searchPostBar" v-if="showSearchBar" @click="sidebarOpen = false">
         <input id="searchBar" v-model="searchKey" type="text" placeholder="Search any post...">
         <button id="searchButton" class="typeSubmit" @click="emitSearch">Search</button>
       </div>
       <!-- Right Buttons (admin) -->
-      <div class="roleTools">
+      <div class="roleTools" @click="sidebarOpen = false">
         <RouterLink class="adminButton" to="/createVg" v-if="isManager">Manage VG's</RouterLink>
         <RouterLink class="adminButton" to="/manageRoles" v-if="isAdmin">Manage Roles</RouterLink>
       </div>
