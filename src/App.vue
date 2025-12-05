@@ -45,7 +45,7 @@
               <span>{{ vg.name }}</span>
             </RouterLink>
             <button class="normalButton2" v-if="$route.name === 'CreateVG'" @click="selectVG(vg)">✏️</button>
-            <RouterLink class="delete" id="infoVgButton"
+            <RouterLink v-if="$route.name !== 'CreateVG'" class="delete" id="infoVgButton"
                         :to="{
             name: 'InfosVg',
             params: { id: vg.id_vg },
