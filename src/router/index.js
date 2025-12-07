@@ -36,30 +36,26 @@ const routes = [
     component: () => import('@/page/VGs/HomePage.vue'),
     props: route => ({
       id: route.params.id,
-      vg: history.state.vg   // 👈 récupération automatique
+      vg: history.state.vg
     })
   },
 ]
 
-// 👉 on crée le router dans une variable
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
-// 👉 middleware d’authentification
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
 
-  // routes accessibles sans être connecté
   const publicPages = ['login', 'register']
 
-  // si l'utilisateur n'est pas connecté et essaye une page protégée → redirect
   if (!token && !publicPages.includes(to.name)) {
     return next('/login')
   }
 
-  next()
+  return next()
 })
 
 export default router
