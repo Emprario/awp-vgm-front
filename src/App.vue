@@ -66,6 +66,7 @@ import HomePage from '@/page/VGs/HomePage.vue'
 import InfosVg from '@/page/VGs/infosVg.vue'
 import axios from 'axios'
 import { eventBus } from '@/eventBus';
+import {domain, http_proto} from '@/main.js'
 
 export default {
   name: 'App',
@@ -84,14 +85,14 @@ export default {
   methods:{
     async fetchVGs() {
       const token = localStorage.getItem('token')
-      const VGS = await axios.get('http://localhost:3000/vgd', {
+      const VGS = await axios.get(http_proto+domain+`/vgd`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       this.listVg = VGS.data;
     },
     async fetchMe() {
       const token = localStorage.getItem('token')
-      const me = await axios.get('http://localhost:3000/user/me', {
+      const me = await axios.get(http_proto+domain+`/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       console.log(me)

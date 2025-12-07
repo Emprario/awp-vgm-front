@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios'
 import { eventBus } from '@/eventBus.js'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   data() {
@@ -12,7 +13,7 @@ export default {
   methods: {
     async addRole(){
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:3000/user/assign', {
+      await axios.post(http_proto+domain+`/user/assign`, {
         username: this.username,
         role: this.role,
       }, {
@@ -21,7 +22,7 @@ export default {
     },
     async deleteRole() {
       const token = localStorage.getItem('token')
-      await axios.delete('http://localhost:3000/user/assign', {
+      await axios.delete(http_proto+domain+`/user/assign`, {
         headers: { Authorization: `Bearer ${token}` },
         data: {        // 👈 ici, c’est correct
           username: this.username,

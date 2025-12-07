@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   props: {
@@ -13,7 +14,7 @@ export default {
   methods: {
     async fetchVGs() {
       const token = localStorage.getItem('token')
-      const VGS = await axios.get('http://localhost:3000/vgd', {
+      const VGS = await axios.get(http_proto+domain+`/vgd`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       this.listVg = VGS.data;

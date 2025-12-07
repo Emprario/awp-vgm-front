@@ -95,14 +95,14 @@ export default {
           })
         }
         else {
-          response = await axios.get(`http://localhost:3000/post/?gs=${this.id}`, {
+          response = await axios.get(http_proto+domain+`/post/?gs=${this.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         }
       }
       this.posts = response.data
       for (const post of this.posts) {
-        const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        const plays = await axios.get(http_proto+domain+`/post/${post.id_post}/play`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isPlayed = plays.data.played
@@ -112,7 +112,7 @@ export default {
     },
     async fetchMe() {
       const token = localStorage.getItem('token')
-      const me = await axios.get('http://localhost:3000/user/me', {
+      const me = await axios.get(http_proto+domain+`/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.me = me.data
@@ -121,7 +121,7 @@ export default {
     },
     async fetchVGs() {
       const token = localStorage.getItem('token')
-      const VGS = await axios.get('http://localhost:3000/vgd', {
+      const VGS = await axios.get(http_proto+domain+`/vgd`, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -180,7 +180,7 @@ export default {
       const token = localStorage.getItem('token')
       this.newPost.qsetArray = this.newQcm
 
-      await axios.post('http://localhost:3000/post', this.newPost, {
+      await axios.post(http_proto+domain+`/post`, this.newPost, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.newPost = {
@@ -209,7 +209,7 @@ export default {
 
       await this.fetchPosts();
       for (const post of this.posts) {
-        const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+        const plays = await axios.get(http_proto+domain+`/post/${post.id_post}/play`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isPlayed = plays.data.isPlayed
@@ -223,7 +223,7 @@ export default {
       }
       const token = localStorage.getItem('token')
       await axios.post(
-        `http://localhost:3000/post/${this.selectedPost.id_post}/reply`,
+        http_proto+domain+`/post/${this.selectedPost.id_post}/reply`,
         { content: this.newPost.content },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -241,22 +241,22 @@ export default {
     },
     async togglePlays(post) {
       const token = localStorage.getItem('token')
-      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+      const plays = await axios.get(http_proto+domain+`/post/${post.id_post}/play`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       post.isPlayed = plays.data.played
       if (post.isPlayed) {
-        await axios.delete(`http://localhost:3000/post/${post.id_post}/play`, {
+        await axios.delete(http_proto+domain+`/post/${post.id_post}/play`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isPlayed = false
       } else {
-        await axios.post(`http://localhost:3000/post/${post.id_post}/play`, '', {
+        await axios.post(http_proto+domain+`/post/${post.id_post}/play`, '', {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isPlayed = true
       }
-      const playsUpdate = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+      const playsUpdate = await axios.get(http_proto+domain+`/post/${post.id_post}/play`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       post.plays = playsUpdate.data.amount
@@ -264,7 +264,7 @@ export default {
     async signal(post){
       const token = localStorage.getItem('token')
       if (!post.isSignaled) {
-        await axios.post(`http://localhost:3000/post/${post.id_post}/signal`, '', {
+        await axios.post(http_proto+domain+`/post/${post.id_post}/signal`, '', {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isSignaled = true
@@ -273,7 +273,7 @@ export default {
     },
     async getSignals(post){
       const token = localStorage.getItem('token')
-      const signals = await axios.get(`http://localhost:3000/post/${post.id_post}/signal`, {
+      const signals = await axios.get(http_proto+domain+`/post/${post.id_post}/signal`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       post.isSignaled = signals.data.signaled
@@ -282,10 +282,10 @@ export default {
     async selectPost(post) {
       console.log(post)
       const token = localStorage.getItem('token')
-      const response = await axios.get(`http://localhost:3000/post/${post.id_post}`, {
+      const response = await axios.get(http_proto+domain+`/post/${post.id_post}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play`, {
+      const plays = await axios.get(http_proto+domain+`/post/${post.id_post}/play`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.selectedPost = response.data.post
@@ -320,7 +320,7 @@ export default {
     },
     async delPost(postId){
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:3000/post/${postId}`, {
+      await axios.delete(http_proto+domain+`/post/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.isAnswering = false
@@ -333,7 +333,7 @@ export default {
     },
     async delAnswer(answer){
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:3000/post/${answer.post.id_post}`, {
+      await axios.delete(http_proto+domain+`/post/${answer.post.id_post}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       await this.selectPost(this.selectedPost)

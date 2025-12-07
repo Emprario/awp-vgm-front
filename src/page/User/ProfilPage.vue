@@ -2,6 +2,7 @@
 import PostBox from '@/components/Posts/PostBox.vue'
 import PostCreation from '@/components/Posts/postCreationComponent.vue'
 import axios from 'axios'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   components: { PostBox, PostCreation },
@@ -16,12 +17,12 @@ export default {
   methods: {
     async fetchMyPosts() {
       const token = localStorage.getItem('token')
-      const response = await axios.get(`http://localhost:3000/post/?u=${this.me.username}`, {
+      const response = await axios.get(http_proto+domain+`/post/?u=${this.me.username}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.posts = response.data
       for (const post of this.posts) {
-        const plays = await axios.get(`http://localhost:3000/post/${post.id_post}/play/?u=${this.me.username}`, {
+        const plays = await axios.get(http_proto+domain+`/post/${post.id_post}/play/?u=${this.me.username}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         post.isPlayed = plays.data.played
@@ -31,7 +32,7 @@ export default {
     },
     async getSignals(post){
       const token = localStorage.getItem('token')
-      const signals = await axios.get(`http://localhost:3000/post/${post.id_post}/signal`, {
+      const signals = await axios.get(http_proto+domain+`/post/${post.id_post}/signal`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       post.isSignaled = signals.data.signaled
@@ -39,14 +40,14 @@ export default {
     },
     async getMe(){
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:3000/user/me', {
+      const response = await axios.get(http_proto+domain+`/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.me = response.data
     },
     async delPost(){
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:3000/post/${this.selectedPost.id_post}`, {
+      await axios.delete(http_proto+domain+`/post/${this.selectedPost.id_post}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.selectedPost = null;
@@ -58,7 +59,7 @@ export default {
         return
       }
       const token = localStorage.getItem('token')
-      await axios.put(`http://localhost:3000/post/${this.selectedPost.id_post}`, this.selectedPost, {
+      await axios.put(http_proto+domain+`/post/${this.selectedPost.id_post}`, this.selectedPost, {
         headers: { Authorization: `Bearer ${token}` }
       })
       await this.fetchMyPosts()
@@ -81,11 +82,11 @@ export default {
     },
     async getLastsScores(){
       const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:3000/session', {
+      const response = await axios.get(http_proto+domain+`/session`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       for (const score of response.data) {
-        const Post = await axios.get(`http://localhost:3000/post/${score.id_post}`, {
+        const Post = await axios.get(http_proto+domain+`/post/${score.id_post}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.lastsScores.push({namePost: Post.data.post.title, score: score.score})

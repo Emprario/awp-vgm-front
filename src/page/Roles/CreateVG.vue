@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios'
 import { eventBus } from '@/eventBus.js'
+import {domain, http_proto} from '@/main.js'
 
 export default{
   data(){
@@ -34,7 +35,7 @@ export default{
         return;
       }
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:3000/vgd', this.newVg, {
+      await axios.post(http_proto+domain+`/vgd`, this.newVg, {
         headers: { Authorization: `Bearer ${token}` },
       })
       eventBus.emit('refreshVg');
@@ -42,14 +43,14 @@ export default{
     async updateVG(){
       console.log(this.newVg)
       const token = localStorage.getItem('token')
-      await axios.put(`http://localhost:3000/vgd/${this.selectedVG.id_vg}`, this.newVg, {
+      await axios.put(http_proto+domain+`/vgd/${this.selectedVG.id_vg}`, this.newVg, {
         headers: { Authorization: `Bearer ${token}` }
       })
       eventBus.emit('refreshVg');
     },
     async deleteVG(VGId){
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:3000/vgd/${VGId}`, {
+      await axios.delete(http_proto+domain+`/vgd/${VGId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.selectedVG = null;

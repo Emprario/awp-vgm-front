@@ -23,6 +23,7 @@
 <script>
 import axios from 'axios'
 import { eventBus } from '@/eventBus.js';
+import {domain, http_proto} from '@/main.js'
 
 export default {
   data() {
@@ -31,7 +32,7 @@ export default {
   methods: {
     async login() {
       try {
-        const res = await axios.post('http://localhost:3000/auth/login', {
+        const res = await axios.post(http_proto+domain+`/auth/login`, {
           username: this.username,
           password: this.password
         })

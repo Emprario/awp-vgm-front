@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   name: 'QCMComposent',
@@ -54,7 +55,7 @@ export default {
       console.log(data)
       const token = localStorage.getItem('token')
       const response = await axios.post(
-        `http://localhost:3000/post/${this.idPost}/submit`,
+        http_proto+domain+`/post/${this.idPost}/submit`,
         {
           id_session : this.session,
           data : data, },
@@ -95,14 +96,14 @@ export default {
     },
     async getScore() {
       const token = localStorage.getItem('token')
-      const response = await axios.get(`http://localhost:3000/session/${this.session}`, {
+      const response = await axios.get(http_proto+domain+`/session/${this.session}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.score = response.data.score
     },
     async getAvgScore() {
       const token = localStorage.getItem('token')
-      const response = await axios.get(`http://localhost:3000/post/${this.idPost}/score`, {
+      const response = await axios.get(http_proto+domain+`/post/${this.idPost}/score`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       this.avgScore  = response.data.AVG_score;

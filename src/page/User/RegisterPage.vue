@@ -25,6 +25,7 @@
 
 <script>
 import axios from 'axios'
+import {domain, http_proto} from '@/main.js'
 
 export default {
   name: 'UserRegisterView',
@@ -68,7 +69,7 @@ export default {
         return;
       }
       try {
-        await axios.post('http://localhost:3000/auth/sign-in', {
+        await axios.post(http_proto+domain+`/auth/sign-in`, {
           username: this.username,
           mail: this.email,
           password: this.password
