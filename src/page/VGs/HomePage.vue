@@ -456,7 +456,7 @@ export default {
       </div>
       <!-- Create QCM -->
       <div id="creationQCM" class="mainComponent">
-        <h2 class="title1">QCM</h2>
+        <h2 class="title1">MCQ</h2>
         <div v-for="(question, index) in newQcm" :key="index">
           <QuestionComponent :question="question" :index="index" @remove="removeQuestion(index)" />
         </div>
